@@ -3,6 +3,8 @@
 > 轻量化简历制作桌面应用 · 第一版
 > 技术栈：Electron 42 + React 19 + TypeScript + Vite 6 + Tailwind CSS 4 + Zustand 5
 > 开发日期：2026-06-24
+>
+> 🤖 **本项目由 AI（Claude Code + deepseek-v4-pro）辅助开发完成。**
 
 ---
 
