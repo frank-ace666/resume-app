@@ -9,10 +9,10 @@ export const PRODUCT = {
   email: 'aceg5166@gmail.com',
 
   /**
-   * 代码仓库地址。填上后「支持我」里会出现「给项目点个 star」。
+   * 代码仓库地址。同时被「检查更新」用来定位版本清单。
    * 例：'https://github.com/your-name/resume-craft'
    */
-  repoUrl: '',
+  repoUrl: 'https://github.com/frank-ace666/resume-app',
 
   /**
    * 社区 / 讨论区地址。目前建议用 GitHub Discussions（免费、零维护、可被搜索收录）。
@@ -22,8 +22,7 @@ export const PRODUCT = {
   communityUrl: '',
 
   /**
-   * 新版本下载页。用于「检查更新」与更新提示里的按钮。
-   * 留空时更新日志会说明本应用离线运行、需手动获取新版本。
+   * 新版本下载页。留空时由仓库地址推导（指向 Releases 页）。
    */
   downloadUrl: '',
 
@@ -40,3 +39,35 @@ export const PRODUCT = {
 } as const
 
 export const hasLink = (v: string): boolean => v.trim().length > 0
+
+/* ============================================================
+   从仓库地址推导出的地址
+   ------------------------------------------------------------
+   只用 repoUrl 一个来源，避免多处配置各自漂移。
+   ============================================================ */
+
+const REPO_PATH = PRODUCT.repoUrl.replace(/^https?:\/\/github\.com\//, '').replace(/\/+$/, '')
+
+export const REPO = REPO_PATH.includes('/')
+  ? { owner: REPO_PATH.split('/')[0], name: REPO_PATH.split('/')[1] }
+  : null
+
+/**
+ * 版本清单地址。
+ *
+ * **刻意用 raw.githubusercontent 而不是 GitHub API**：实测匿名 API 是
+ * 每 IP 每小时 60 次，走 VPN 或公司出口的用户很容易撞上
+ * `API rate limit exceeded`（本次开发机的代理出口就被限流了）。
+ * raw 走 CDN、不占该配额，且读的就是仓库里已存在的 package.json ——
+ * 不额外维护一个容易忘记同步的版本文件。
+ */
+export const VERSION_MANIFEST_URL = REPO
+  ? `https://raw.githubusercontent.com/${REPO.owner}/${REPO.name}/main/package.json`
+  : ''
+
+/** 新版本下载页：优先用显式配置，否则指向 Releases */
+export const DOWNLOAD_URL = hasLink(PRODUCT.downloadUrl)
+  ? PRODUCT.downloadUrl
+  : REPO
+    ? `https://github.com/${REPO.owner}/${REPO.name}/releases/latest`
+    : ''

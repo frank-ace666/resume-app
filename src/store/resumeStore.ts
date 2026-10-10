@@ -49,6 +49,12 @@ const uuid = () => crypto.randomUUID()
  *
  * 以前每个 action 都自己拼一遍 `meta: { ...s.data.meta, updatedAt: … }` 并置 isDirty ——
  * 同一件事写了十几遍，漏一处时间戳就不会更新。现在只在这里做一次。
+ *
+ * ⚠️ `meta` 必须**合并**而不是覆盖：`setTemplate` / `setAccentColor` 正是通过
+ * `next.meta` 传值的。曾经这里写成
+ *     { ...state.data, ...next, meta: { ...state.data.meta, updatedAt } }
+ * 最后一行的 `state.data.meta`（旧值）把 `next.meta`（新值）整个盖掉，
+ * 导致换模板、换主题色**静默失效** —— 界面点了没反应，且没有任何报错。
  */
 function edited(
   state: Pick<ResumeStore, 'data'>,
@@ -58,7 +64,11 @@ function edited(
     data: {
       ...state.data,
       ...next,
-      meta: { ...state.data.meta, updatedAt: new Date().toISOString() }
+      meta: {
+        ...state.data.meta,
+        ...(next.meta ?? {}),
+        updatedAt: new Date().toISOString()
+      }
     },
     isDirty: true
   }

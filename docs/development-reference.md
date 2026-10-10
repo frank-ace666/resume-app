@@ -555,9 +555,10 @@ Electron (2)：electron/main/index.ts, electron/preload/index.ts
 Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
            hooks/useResizable.ts, hooks/usePdfExport.ts
 
-工具 (10)：utils/fileIO.ts, utils/pdfExport.ts, utils/templateRegistry.ts,
+工具 (11)：utils/fileIO.ts, utils/pdfExport.ts, utils/templateRegistry.ts,
            utils/resumeChecker.ts, utils/validators.ts, utils/sectionProgress.ts,
-           utils/color.ts, utils/accents.ts, utils/image.ts, utils/mailto.ts
+           utils/color.ts, utils/accents.ts, utils/image.ts, utils/mailto.ts,
+           utils/updateChecker.ts
 
 数据 (4)：src/data/faq.ts（常见问题，依据见文件头注释）、
           src/data/releases.ts（版本更新日志，随包内置）、
