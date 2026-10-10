@@ -276,6 +276,20 @@ resume-app/
 
 ### 模板样式策略
 
+### ⚠️ `@layer` 使用约定（违反会让工具类静默失效）
+
+CSS 层叠层的规则是：**无层（unlayered）样式优先于任何 `@layer` 内的样式，与选择器权重无关。**
+Tailwind v4 的工具类都在 `@layer utilities` 里，所以项目自定义样式**必须**放进 `@layer`。
+
+曾经踩过的坑：一条无层的 `* { margin: 0; padding: 0 }` 让**全站所有 padding / margin 工具类全部失效**
+（`.p-6` 计算值为 `0px`），且因为布局大量依赖 `gap-*` 与固定高度，长期未被发现。
+
+因此：
+
+- 基础重置**交给 Tailwind preflight**（已在 `@layer base` 内），不要再自己写 `*` 重置
+- 项目自有样式放 `@layer base`（基础/全局）或 `@layer components`（可被工具类覆盖的组件类）
+- `src/index.css` 顶部有同样的约定说明
+
 ### ⚠️ 模板内颜色的硬性约束（违反会导致 PDF 导出直接失败）
 
 简历模板的颜色**只能**取自 `src/components/templates/shared.tsx` 的 `PRINT` 色板，并以 inline style 施加。原因：

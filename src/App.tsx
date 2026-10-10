@@ -3,6 +3,7 @@ import AppBar from './components/layout/AppBar'
 import MainLayout from './components/layout/MainLayout'
 import StatusBar from './components/layout/StatusBar'
 import ConfirmDialog from './components/ui/ConfirmDialog'
+import ValidationBlockDialog from './components/ui/ValidationBlockDialog'
 import ToastHost from './components/ui/ToastHost'
 import { useResumeStore } from './store/resumeStore'
 import { useUIStore } from './store/uiStore'
@@ -28,8 +29,9 @@ export default function App() {
   // 简历强调色 → 应用外壳主题
   useAccentTheme()
 
-  // PDF 导出
-  const { isExporting, handleExportPDF } = usePdfExport()
+  // PDF 导出（含导出前的格式校验闸门）
+  const { isExporting, handleExportPDF, exportAnyway, blockedIssues, clearBlocked } =
+    usePdfExport()
 
   const hasContent = Boolean(data.personalInfo.fullName || data.summary)
 
@@ -94,6 +96,12 @@ export default function App() {
           setConfirmNewOpen(false)
           doCreateNew()
         }}
+      />
+
+      <ValidationBlockDialog
+        issues={blockedIssues}
+        onClose={clearBlocked}
+        onExportAnyway={exportAnyway}
       />
 
       <ToastHost />

@@ -2,13 +2,16 @@ import { useCallback, useState } from 'react'
 import { exportPDF } from '@/utils/pdfExport'
 import { useResumeStore } from '@/store/resumeStore'
 import { toast } from '@/store/toastStore'
+import { collectResumeIssues, type ResumeValidationIssue } from '@/utils/validators'
 
 export function usePdfExport() {
   const [isExporting, setIsExporting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [blockedIssues, setBlockedIssues] = useState<ResumeValidationIssue[]>([])
   const fileName = useResumeStore((s) => s.fileName)
 
-  const handleExportPDF = useCallback(async () => {
+  /** 真正执行导出。只应由 handleExportPDF 或「仍然导出」调用。 */
+  const runExport = useCallback(async () => {
     const element = document.getElementById('resume-preview-content')
     if (!element) {
       setError('未找到简历预览内容')
@@ -44,10 +47,32 @@ export function usePdfExport() {
     }
   }, [fileName])
 
+  /**
+   * 导出前的闸门：先用与表单同一套谓词扫一遍，
+   * 有问题就拦下并列出，而不是导出一份带错格式的简历出去。
+   */
+  const handleExportPDF = useCallback(() => {
+    const issues = collectResumeIssues(useResumeStore.getState().data)
+    if (issues.length > 0) {
+      setBlockedIssues(issues)
+      return
+    }
+    void runExport()
+  }, [runExport])
+
+  /** 用户选择「仍然导出」：放行一次 */
+  const exportAnyway = useCallback(() => {
+    setBlockedIssues([])
+    void runExport()
+  }, [runExport])
+
   return {
     isExporting,
     error,
     handleExportPDF,
+    exportAnyway,
+    blockedIssues,
+    clearBlocked: () => setBlockedIssues([]),
     clearError: () => setError(null)
   }
 }

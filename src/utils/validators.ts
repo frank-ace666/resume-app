@@ -9,6 +9,9 @@
  * —— 就地校验要短，检查报告要解释清楚为什么、怎么改。
  */
 
+import type { ResumeData } from '@/types/resume'
+import type { SectionKey } from '@/types/optimization'
+
 export interface FieldCheck {
   ok: boolean
   message?: string
@@ -162,4 +165,65 @@ export function checkDateRange(
   if (opts.isCurrent) return OK
   if (e < s) return fail('结束时间不能早于开始时间')
   return OK
+}
+
+/* ============================================================
+   整份简历的校验汇总
+   ------------------------------------------------------------
+   用途：导出 PDF 前做一次闸门检查。
+   与表单就地校验共用同一批谓词，因此不会出现
+   「输入框没报错、导出却被拦下」这种自相矛盾。
+   ============================================================ */
+
+export interface ResumeValidationIssue {
+  /** 对应 FORM_STEPS 的 key，用于「去修正」跳转 */
+  section: SectionKey
+  /** 出问题的条目，如「教育经历 1」 */
+  where: string
+  message: string
+}
+
+export function collectResumeIssues(data: ResumeData): ResumeValidationIssue[] {
+  const out: ResumeValidationIssue[] = []
+
+  const push = (
+    section: SectionKey,
+    where: string,
+    check: FieldCheck
+  ): void => {
+    if (!check.ok && check.message) out.push({ section, where, message: check.message })
+  }
+
+  // —— 个人信息 ——
+  const p = data.personalInfo
+  push('personalInfo', '邮箱', checkEmail(p.email))
+  push('personalInfo', '电话', checkPhone(p.phone))
+  push('personalInfo', '个人网站', checkUrl(p.website ?? '', '个人网站'))
+  push('personalInfo', 'GitHub', checkGithub(p.github ?? ''))
+  push('personalInfo', 'LinkedIn', checkLinkedin(p.linkedin ?? ''))
+
+  // —— 教育经历 ——
+  data.education.forEach((e, i) => {
+    const where = `教育经历 ${i + 1}`
+    push('education', where, checkDateRange(e.startDate, e.endDate))
+    push('education', where, checkGpa(e.gpa ?? ''))
+  })
+
+  // —— 工作经历 ——
+  data.workExperience.forEach((w, i) => {
+    push(
+      'workExperience',
+      `工作经历 ${i + 1}`,
+      checkDateRange(w.startDate, w.endDate, { isCurrent: w.isCurrent })
+    )
+  })
+
+  // —— 项目经历 ——
+  data.projects.forEach((pj, i) => {
+    const where = `项目经历 ${i + 1}`
+    push('projects', where, checkDateRange(pj.startDate, pj.endDate ?? ''))
+    push('projects', where, checkLink(pj.link ?? '', '项目链接'))
+  })
+
+  return out
 }
