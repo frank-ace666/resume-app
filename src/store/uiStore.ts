@@ -33,6 +33,10 @@ interface UIStore {
   isFocusMode: boolean
   /** 预览是否跟随容器宽度自适应 */
   fitToWidth: boolean
+  /** 上次启动时见过的版本号 —— 用于判断要不要弹「本次更新」 */
+  lastSeenVersion: string
+  /** 帮助与反馈模块当前选中的分段（不持久化，仅用于跨组件跳转） */
+  helpView: string
 
   setCurrentStep: (step: number) => void
   setPreviewScale: (scale: number) => void
@@ -42,6 +46,8 @@ interface UIStore {
   setEditorWidthPct: (pct: number) => void
   toggleFocusMode: () => void
   setFitToWidth: (fit: boolean) => void
+  setLastSeenVersion: (version: string) => void
+  setHelpView: (view: string) => void
 }
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
@@ -59,6 +65,8 @@ export const useUIStore = create<UIStore>()(
       // 默认适应宽度：100% 缩放时 A4（794px）通常比预览区宽，
       // 会让简历右侧被裁掉。先自适应，用户主动缩放时再切回固定比例。
       fitToWidth: true,
+      lastSeenVersion: '',
+      helpView: 'faq',
 
       setCurrentStep: (step) => set({ currentStep: step }),
       setPreviewScale: (scale) => set({ previewScale: clamp(scale, 25, 200), fitToWidth: false }),
@@ -67,7 +75,9 @@ export const useUIStore = create<UIStore>()(
       toggleNav: () => set((s) => ({ navCollapsed: !s.navCollapsed })),
       setEditorWidthPct: (pct) => set({ editorWidthPct: clamp(pct, 25, 75) }),
       toggleFocusMode: () => set((s) => ({ isFocusMode: !s.isFocusMode })),
-      setFitToWidth: (fit) => set({ fitToWidth: fit })
+      setFitToWidth: (fit) => set({ fitToWidth: fit }),
+      setLastSeenVersion: (version) => set({ lastSeenVersion: version }),
+      setHelpView: (view) => set({ helpView: view })
     }),
     {
       name: 'resume-craft-ui',
@@ -76,7 +86,8 @@ export const useUIStore = create<UIStore>()(
         navCollapsed: s.navCollapsed,
         editorWidthPct: s.editorWidthPct,
         previewScale: s.previewScale,
-        fitToWidth: s.fitToWidth
+        fitToWidth: s.fitToWidth,
+        lastSeenVersion: s.lastSeenVersion
       })
     }
   )

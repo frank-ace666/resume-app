@@ -536,7 +536,9 @@ Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
            utils/resumeChecker.ts, utils/validators.ts, utils/sectionProgress.ts,
            utils/color.ts, utils/accents.ts, utils/image.ts, utils/mailto.ts
 
-数据 (1)：src/data/faq.ts（常见问题内容，依据见文件头注释）
+数据 (3)：src/data/faq.ts（常见问题，依据见文件头注释）、
+          src/data/releases.ts（版本更新日志，随包内置）、
+          src/data/product.ts（需填写的外部链接，留空即隐藏入口）
 
 入口 (5)：index.html, src/main.tsx, src/App.tsx, src/index.css, src/global.d.ts
 

@@ -339,3 +339,25 @@ export const IconExternal = (p: IconProps) => (
     <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
   </Icon>
 )
+
+export const IconHistory = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M3.5 12a8.5 8.5 0 1 0 2.6-6.1" />
+    <path d="M3.5 4.5V10H9" />
+    <path d="M12 8v4.5l3 1.8" />
+  </Icon>
+)
+
+export const IconUsers = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20" />
+    <circle cx="9.5" cy="7.5" r="3.5" />
+    <path d="M21 20v-1.5a4 4 0 0 0-3-3.87M16.5 4.13a4 4 0 0 1 0 7.75" />
+  </Icon>
+)
+
+export const IconStar = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.8z" />
+  </Icon>
+)

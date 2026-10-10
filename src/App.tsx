@@ -4,12 +4,15 @@ import MainLayout from './components/layout/MainLayout'
 import StatusBar from './components/layout/StatusBar'
 import ConfirmDialog from './components/ui/ConfirmDialog'
 import ValidationBlockDialog from './components/ui/ValidationBlockDialog'
+import WhatsNewDialog from './components/ui/WhatsNewDialog'
 import ToastHost from './components/ui/ToastHost'
 import { useResumeStore } from './store/resumeStore'
 import { useUIStore } from './store/uiStore'
 import { useAutoSave } from './hooks/useAutoSave'
 import { usePdfExport } from './hooks/usePdfExport'
 import { useAccentTheme } from './hooks/useAccentTheme'
+import { useWhatsNew } from './hooks/useWhatsNew'
+import { FORM_STEPS } from './store/uiStore'
 import { saveToFile, loadFromFile } from './utils/fileIO'
 import { toast } from './store/toastStore'
 
@@ -20,6 +23,8 @@ export default function App() {
   const data = useResumeStore((s) => s.data)
   const isAutoSaved = useUIStore((s) => s.isAutoSaved)
   const lastSavedAt = useUIStore((s) => s.lastSavedAt)
+  const setCurrentStep = useUIStore((s) => s.setCurrentStep)
+  const setHelpView = useUIStore((s) => s.setHelpView)
 
   const [confirmNewOpen, setConfirmNewOpen] = useState(false)
 
@@ -28,6 +33,16 @@ export default function App() {
 
   // 简历强调色 → 应用外壳主题
   useAccentTheme()
+
+  // 版本变化时提示本版更新（不联网，依据本地记录的版本号）
+  const { isOpen: whatsNewOpen, release, dismiss: dismissWhatsNew } = useWhatsNew()
+
+  const goToReleases = useCallback(() => {
+    const idx = FORM_STEPS.findIndex((s) => s.key === 'support')
+    if (idx >= 0) setCurrentStep(idx)
+    setHelpView('releases')
+    dismissWhatsNew()
+  }, [setCurrentStep, setHelpView, dismissWhatsNew])
 
   // PDF 导出（含导出前的格式校验闸门）
   const { isExporting, handleExportPDF, exportAnyway, blockedIssues, clearBlocked } =
@@ -103,6 +118,14 @@ export default function App() {
         onClose={clearBlocked}
         onExportAnyway={exportAnyway}
       />
+
+      {whatsNewOpen && release && (
+        <WhatsNewDialog
+          release={release}
+          onClose={dismissWhatsNew}
+          onSeeAll={goToReleases}
+        />
+      )}
 
       <ToastHost />
     </>

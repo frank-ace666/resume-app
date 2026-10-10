@@ -1,6 +1,10 @@
 import { useMemo, useState, Fragment, type ReactNode } from 'react'
 import { toast } from '@/store/toastStore'
+import { useUIStore } from '@/store/uiStore'
 import { FAQ_ITEMS, FAQ_CATEGORIES, type FaqCategory } from '@/data/faq'
+import { RELEASES } from '@/data/releases'
+import { PRODUCT, hasLink } from '@/data/product'
+import { ReleaseHeader, ReleaseHighlights } from '@/components/ui/ReleaseNotes'
 import { buildMailto, copyText, openExternal, FEEDBACK_EMAIL } from '@/utils/mailto'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -13,11 +17,14 @@ import {
   IconExternal,
   IconHeart,
   IconHelp,
+  IconHistory,
   IconLightbulb,
   IconSearch,
   IconSend,
+  IconStar,
   IconThumbsDown,
-  IconThumbsUp
+  IconThumbsUp,
+  IconUsers
 } from '@/components/ui/Icons'
 
 /* ============ 富文本：支持 **粗体** 与 `- ` 列表 ============ */
@@ -372,7 +379,63 @@ function ContributeView() {
   )
 }
 
-/* ============ 视图 4：支持我 ============ */
+/* ============ 视图 4：更新日志 ============ */
+
+function ReleasesView() {
+  const current = __APP_VERSION__
+
+  return (
+    <div className="space-y-4">
+      <Card className="flex flex-wrap items-start gap-3 bg-canvas p-4">
+        <span className="mt-0.5 shrink-0 text-brand">
+          <IconHistory size={18} />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-ink">
+            当前版本 v{current}
+            {PRODUCT.name ? ` · ${PRODUCT.name}` : ''}
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-ink-2">
+            本应用完全离线运行，不会在后台联网检查新版本。这里的更新日志随安装包内置，
+            记录的是你手上这一版包含的变化。要获取新版本，需手动下载覆盖安装。
+          </p>
+          {hasLink(PRODUCT.downloadUrl) && (
+            <Button
+              variant="tonal"
+              size="sm"
+              className="mt-2.5"
+              icon={<IconExternal size={14} />}
+              onClick={() => openExternal(PRODUCT.downloadUrl)}
+            >
+              前往下载页
+            </Button>
+          )}
+        </div>
+      </Card>
+
+      {RELEASES.map((r) => {
+        const isCurrent = r.version === current
+        return (
+          <Card key={r.version} className={`p-4 ${isCurrent ? 'ring-1 ring-brand' : ''}`}>
+            <div className="flex flex-wrap items-center gap-2">
+              <ReleaseHeader release={r} />
+              {isCurrent && (
+                <span className="ml-auto shrink-0 rounded-full bg-brand-soft px-2 py-0.5 text-[10px] font-medium text-brand">
+                  当前版本
+                </span>
+              )}
+            </div>
+            <div className="mt-4 border-t border-outline pt-4">
+              <ReleaseHighlights release={r} />
+            </div>
+          </Card>
+        )
+      })}
+    </div>
+  )
+}
+
+/* ============ 视图 5：支持我 ============ */
 
 const SUPPORT_WAYS = [
   {
@@ -425,6 +488,78 @@ function SupportView() {
         </div>
       </Card>
 
+      {/* 社区：地址未配置时不显示死链，如实说明并引导走邮件 */}
+      <Card className="p-4">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 shrink-0 text-brand">
+            <IconUsers size={18} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-ink">讨论区</p>
+            {hasLink(PRODUCT.communityUrl) ? (
+              <>
+                <p className="mt-1 text-xs leading-relaxed text-ink-2">
+                  有问题、想法或者想看看别人怎么写的，都可以去讨论区。
+                </p>
+                <Button
+                  variant="tonal"
+                  size="sm"
+                  className="mt-2.5"
+                  icon={<IconExternal size={14} />}
+                  onClick={() => openExternal(PRODUCT.communityUrl)}
+                >
+                  进入讨论区
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="mt-1 text-xs leading-relaxed text-ink-2">
+                  还没有开放。现在使用者还不多，开一个没人说话的讨论区反而是种负担，
+                  等积累一些用户后再开。在那之前，问题直接发邮件给我就行。
+                </p>
+                <Button
+                  variant="text"
+                  size="sm"
+                  className="mt-2"
+                  icon={<IconSend size={14} />}
+                  onClick={() =>
+                    openExternal(buildMailto({ subject: '[讨论] 简历工坊' }))
+                  }
+                >
+                  发邮件
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </Card>
+
+      {/* 仓库：同样按配置决定显隐 */}
+      {hasLink(PRODUCT.repoUrl) && (
+        <Card className="p-4">
+          <div className="flex items-start gap-3">
+            <span className="mt-0.5 shrink-0 text-warning">
+              <IconStar size={18} />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-ink">给项目点个 star</p>
+              <p className="mt-1 text-xs leading-relaxed text-ink-2">
+                能让更多人看到这个项目，也不需要花一分钱。
+              </p>
+              <Button
+                variant="tonal"
+                size="sm"
+                className="mt-2.5"
+                icon={<IconExternal size={14} />}
+                onClick={() => openExternal(PRODUCT.repoUrl)}
+              >
+                打开仓库
+              </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <Card className="space-y-3 p-4">
         <EmailActions subject="[反馈] 简历工坊" primaryLabel="说点什么" />
       </Card>
@@ -436,20 +571,24 @@ function SupportView() {
 
 const SEGMENTS = [
   { key: 'faq', label: '常见问题', icon: <IconHelp size={15} /> },
+  { key: 'releases', label: '更新日志', icon: <IconHistory size={15} /> },
   { key: 'feedback', label: '建议', icon: <IconLightbulb size={15} /> },
   { key: 'contribute', label: '投稿', icon: <IconSend size={15} /> },
   { key: 'support', label: '支持我', icon: <IconHeart size={15} /> }
 ]
 
 export default function HelpForm() {
-  const [view, setView] = useState('faq')
+  // 分段选择放在 store 里，这样「本版更新」弹窗的「查看全部更新」
+  // 可以直接把用户送到「更新日志」这一栏
+  const view = useUIStore((s) => s.helpView)
+  const setView = useUIStore((s) => s.setHelpView)
 
   return (
     <div className="space-y-5">
       <div>
         <h2 className="text-base font-medium text-ink">帮助与反馈</h2>
         <p className="mt-1 text-sm leading-relaxed text-ink-2">
-          常见问题、反馈渠道与投稿方式。找不到答案可以直接发邮件。
+          常见问题、更新日志、反馈渠道与投稿方式。找不到答案可以直接发邮件。
         </p>
       </div>
 
@@ -457,6 +596,7 @@ export default function HelpForm() {
 
       <div key={view} className="anim-fade-slide-in">
         {view === 'faq' && <FaqView />}
+        {view === 'releases' && <ReleasesView />}
         {view === 'feedback' && <FeedbackView />}
         {view === 'contribute' && <ContributeView />}
         {view === 'support' && <SupportView />}
