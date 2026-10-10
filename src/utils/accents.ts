@@ -20,5 +20,3 @@ export const ACCENT_PRESETS: AccentPreset[] = [
   { name: '赭石', value: '#8a5a2b' },
   { name: '青灰', value: '#37667d' }
 ]
-
-export const DEFAULT_ACCENT_VALUE = ACCENT_PRESETS[0].value

@@ -20,6 +20,13 @@ export interface FieldCheck {
 const OK: FieldCheck = { ok: true }
 const fail = (message: string): FieldCheck => ({ ok: false, message })
 
+/**
+ * 取出错误文案，通过时返回 undefined —— 直接喂给 `<TextField error={…}>`。
+ * 省掉调用处的 `const r = checkX(v); const err = r.ok ? undefined : r.message` 三段式。
+ */
+export const errorOf = (check: FieldCheck): string | undefined =>
+  check.ok ? undefined : check.message
+
 /* ============================================================
    谓词（与 resumeChecker 共用）
    ============================================================ */

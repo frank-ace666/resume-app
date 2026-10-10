@@ -1,13 +1,12 @@
-import type { ResumeData, Skill, SkillLevel } from '@/types/resume'
-import { ensureContrastOnWhite } from '@/utils/color'
-
-/* ============================================================
-   简历文档排版尺度
-   ------------------------------------------------------------
-   调研共性：姓名 18–22pt / 分区标题 14–16pt / 正文 10–12pt，
-   行高 1.4–1.5，分区间距 > 条目间距，页边距约 1 inch。
-   这里统一用 px（A4 下 1pt ≈ 1.333px），三套模板共用，避免各写各的。
-   ============================================================ */
+/**
+ * 简历文档的**排版尺度**（纯展示令牌，不含任何数据处理）。
+ *
+ * 数据归一化在 `model.ts` —— 那边回答「有哪些内容、空不空」，
+ * 这里只回答「长什么样」。分开是为了让模板只关心摆放。
+ *
+ * 调研共性：姓名 18–22pt / 分区标题 14–16pt / 正文 10–12pt，
+ * 行高 1.4–1.5，分区间距 > 条目间距。三套模板共用同一套尺度。
+ */
 export const TYPE = {
   name: 'text-[22px] font-bold leading-[1.2]',
   jobTitle: 'text-[13px] leading-snug',
@@ -56,75 +55,3 @@ export const PRINT = {
   onAccent: 'rgba(255, 255, 255, 0.92)',
   onAccentFaint: 'rgba(255, 255, 255, 0.78)'
 } as const
-
-export const SKILL_LEVEL_LABEL: Record<SkillLevel, string> = {
-  beginner: '入门',
-  intermediate: '熟练',
-  advanced: '精通',
-  expert: '专家'
-}
-
-export interface AccentColors {
-  /** 用于文字/实心块，已保证白底对比度 ≥ 4.5:1 */
-  text: string
-  /** 原始强调色，用于细线、标签底色等装饰 */
-  raw: string
-}
-
-export function getAccentColors(data: ResumeData): AccentColors {
-  const raw = data.meta.accentColor || '#1a73e8'
-  return { raw, text: ensureContrastOnWhite(raw, 4.5) }
-}
-
-/** 日期区间：中文简历惯例，统一 `2023.09 – 2024.06` 格式 */
-export function formatRange(start: string, end: string, isCurrent = false): string {
-  const fmt = (v: string) => (v ? v.replace(/-/g, '.') : '')
-  const s = fmt(start)
-  const e = isCurrent ? '至今' : fmt(end)
-  if (!s && !e) return ''
-  if (!s) return e
-  if (!e) return s
-  return `${s} – ${e}`
-}
-
-/** 按分类聚合技能；无分类的归入「其他」 */
-export function groupSkills(skills: Skill[]): { category: string; items: Skill[] }[] {
-  const map = new Map<string, Skill[]>()
-  for (const s of skills) {
-    if (!s.name?.trim()) continue
-    const key = s.category?.trim() || '其他'
-    if (!map.has(key)) map.set(key, [])
-    map.get(key)!.push(s)
-  }
-  return Array.from(map, ([category, items]) => ({ category, items }))
-}
-
-/** 联系方式条目（不含任何图标 —— 图标会被 ATS 解析成乱码） */
-export function contactItems(data: ResumeData): string[] {
-  const p = data.personalInfo
-  return [
-    p.phone,
-    p.email,
-    p.location,
-    p.website,
-    p.github ? `github.com/${p.github.replace(/^https?:\/\/(www\.)?github\.com\//, '')}` : '',
-    p.linkedin
-  ]
-    .map((v) => (v ?? '').trim())
-    .filter(Boolean)
-}
-
-/** 过滤掉空条目，避免渲染出空的分区或空行 */
-export function nonEmpty(items: string[] | undefined): string[] {
-  return (items ?? []).map((v) => v?.trim()).filter((v): v is string => Boolean(v))
-}
-
-export function hasAnySection(data: ResumeData): boolean {
-  return Boolean(
-    data.summary?.trim() ||
-      data.education.length ||
-      data.workExperience.length ||
-      data.skills.length ||
-      data.projects.length
-  )
-}

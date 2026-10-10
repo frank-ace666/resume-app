@@ -2,22 +2,31 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 /**
- * 注意：FORM_STEPS 的 key 与顺序被 OptimizationForm 的「跳转到分区」依赖，
- * 必须与 types/optimization.ts 的 SectionKey 保持一致。不要改动。
+ * 步骤表。
+ *
+ * `kind` 是刻意放进数据里的，而不是在各处写「不等于某几个 key」的黑名单 ——
+ * 每多一个工具步骤就要多改一处判断，早晚漏掉。现在只需读这一列：
+ * - `content`：简历内容，计入填写进度
+ * - `tool`：工具与帮助，不计入
+ *
+ * 注意：key 与顺序被 OptimizationForm 的「跳转到分区」依赖，
+ * 必须与 types/optimization.ts 的 SectionKey 一致。
  */
 export const FORM_STEPS = [
-  { index: 0, label: '个人信息', key: 'personalInfo' },
-  { index: 1, label: '教育经历', key: 'education' },
-  { index: 2, label: '工作经历', key: 'workExperience' },
-  { index: 3, label: '技能特长', key: 'skills' },
-  { index: 4, label: '项目经历', key: 'projects' },
-  { index: 5, label: '自我评价', key: 'summary' },
-  { index: 6, label: '简历检查', key: 'optimization' },
-  // 非内容步骤：不计入填写进度，也不参与检查模块的「跳转到分区」
-  { index: 7, label: '帮助与反馈', key: 'support' }
+  { index: 0, label: '个人信息', key: 'personalInfo', kind: 'content' },
+  { index: 1, label: '教育经历', key: 'education', kind: 'content' },
+  { index: 2, label: '工作经历', key: 'workExperience', kind: 'content' },
+  { index: 3, label: '技能特长', key: 'skills', kind: 'content' },
+  { index: 4, label: '项目经历', key: 'projects', kind: 'content' },
+  { index: 5, label: '自我评价', key: 'summary', kind: 'content' },
+  { index: 6, label: '简历检查', key: 'optimization', kind: 'tool' },
+  { index: 7, label: '帮助与反馈', key: 'support', kind: 'tool' }
 ] as const
 
-export type FormStepKey = (typeof FORM_STEPS)[number]['key']
+export type StepKey = (typeof FORM_STEPS)[number]['key']
+export type FormStepKey = StepKey
+
+export const stepIndex = (key: StepKey): number => FORM_STEPS.findIndex((s) => s.key === key)
 
 interface UIStore {
   currentStep: number

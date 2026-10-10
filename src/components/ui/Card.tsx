@@ -1,30 +1,21 @@
 import type { ReactNode } from 'react'
 
-interface CardProps {
-  children: ReactNode
-  className?: string
-  /** 悬停时抬升（用于可点击的卡片） */
-  interactive?: boolean
-  as?: 'div' | 'section'
-}
-
 /**
- * Material 表面容器。默认描边式（outlined）——
+ * Material 表面容器。默认描边式 ——
  * 大量卡片同屏时描边比阴影更安静，符合 Gmail / YouTube 的表面处理。
+ *
+ * 刻意保持单薄：只接受 children 与 className。
+ * 曾有过 `interactive`（悬停抬升）与 `as`（换标签）两个 prop，无人使用 ——
+ * 可配置但从不配置的接口，只是需要维护的负债。
  */
 export default function Card({
   children,
-  className = '',
-  interactive = false,
-  as: Tag = 'div'
-}: CardProps) {
+  className = ''
+}: {
+  children: ReactNode
+  className?: string
+}) {
   return (
-    <Tag
-      className={`rounded-md border border-outline bg-surface transition-all duration-[var(--duration-base)] ease-[var(--ease-standard)]
-        ${interactive ? 'hover:shadow-e2 hover:border-outline-strong hover:-translate-y-0.5 cursor-pointer' : ''}
-        ${className}`}
-    >
-      {children}
-    </Tag>
+    <div className={`rounded-md border border-outline bg-surface ${className}`}>{children}</div>
   )
 }

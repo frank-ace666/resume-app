@@ -17,26 +17,21 @@ export interface AccordionItemData {
  */
 export default function Accordion({
   items,
-  defaultOpenId,
-  allowMultiple = false
+  defaultOpenId
 }: {
   items: AccordionItemData[]
   defaultOpenId?: string
-  allowMultiple?: boolean
 }) {
-  const [open, setOpen] = useState<string[]>(defaultOpenId ? [defaultOpenId] : [])
+  // 同时只开一项，所以状态就是「哪一项」而不是「哪些项」——
+  // 曾用 string[] 表示，类型上允许同时展开多个，与行为不符。
+  const [openId, setOpenId] = useState<string | null>(defaultOpenId ?? null)
 
-  const toggle = (id: string) => {
-    setOpen((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id)
-      return allowMultiple ? [...prev, id] : [id]
-    })
-  }
+  const toggle = (id: string) => setOpenId((prev) => (prev === id ? null : id))
 
   return (
     <ul className="divide-y divide-outline overflow-hidden rounded-md border border-outline bg-surface">
       {items.map((item) => {
-        const isOpen = open.includes(item.id)
+        const isOpen = openId === item.id
         return (
           <li key={item.id}>
             <button

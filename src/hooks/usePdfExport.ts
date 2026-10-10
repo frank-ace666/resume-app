@@ -4,53 +4,47 @@ import { useResumeStore } from '@/store/resumeStore'
 import { toast } from '@/store/toastStore'
 import { collectResumeIssues, type ResumeValidationIssue } from '@/utils/validators'
 
+/**
+ * PDF 导出。
+ *
+ * 交互反馈一律走 toast（这里不再自己维护一份 error state ——
+ * 曾经同时存在 toast 和 error 两套提示，是重复的表达，且 `error` 无人读取）。
+ * 唯一保留在本 hook 里的状态是需要参与渲染的 `blockedIssues`。
+ */
 export function usePdfExport() {
   const [isExporting, setIsExporting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
   const [blockedIssues, setBlockedIssues] = useState<ResumeValidationIssue[]>([])
   const fileName = useResumeStore((s) => s.fileName)
 
-  /** 真正执行导出。只应由 handleExportPDF 或「仍然导出」调用。 */
   const runExport = useCallback(async () => {
     const element = document.getElementById('resume-preview-content')
     if (!element) {
-      setError('未找到简历预览内容')
       toast.error('未找到简历预览内容，请刷新后重试')
       return
     }
 
     setIsExporting(true)
-    setError(null)
     toast.info('正在生成 PDF…', { duration: 1600 })
 
     try {
-      // 用文件名（去掉扩展名）作为 PDF 默认名，否则回退到姓名
-      const fallback = useResumeStore.getState().data.personalInfo.fullName
+      const { data } = useResumeStore.getState()
       const baseName = fileName
         ? fileName.replace(/\.[^.]+$/, '')
-        : fallback
-          ? `${fallback}-简历`
+        : data.personalInfo.fullName.trim()
+          ? `${data.personalInfo.fullName.trim()}-简历`
           : '我的简历'
 
       const success = await exportPDF(element, baseName)
-      if (success) {
-        toast.success('PDF 已导出')
-      } else {
-        // 用户在弹出的保存对话框里点了取消，不算失败
-        toast.info('已取消导出')
-      }
+      // 失败多半是用户在弹出的保存对话框里点了取消，不算错误
+      toast[success ? 'success' : 'info'](success ? 'PDF 已导出' : '已取消导出')
     } catch {
-      setError('PDF 导出时发生错误')
       toast.error('PDF 导出时发生错误，请重试')
     } finally {
       setIsExporting(false)
     }
   }, [fileName])
 
-  /**
-   * 导出前的闸门：先用与表单同一套谓词扫一遍，
-   * 有问题就拦下并列出，而不是导出一份带错格式的简历出去。
-   */
+  /** 导出前的闸门：用与表单同一套谓词扫一遍，有问题先列出来 */
   const handleExportPDF = useCallback(() => {
     const issues = collectResumeIssues(useResumeStore.getState().data)
     if (issues.length > 0) {
@@ -68,11 +62,9 @@ export function usePdfExport() {
 
   return {
     isExporting,
-    error,
     handleExportPDF,
     exportAnyway,
     blockedIssues,
-    clearBlocked: () => setBlockedIssues([]),
-    clearError: () => setError(null)
+    clearBlocked: () => setBlockedIssues([])
   }
 }

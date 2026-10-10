@@ -2,7 +2,8 @@ import { useCallback, useState, type ButtonHTMLAttributes, type ReactNode } from
 import { IconLoader } from './Icons'
 
 type Variant = 'filled' | 'tonal' | 'outlined' | 'text' | 'icon'
-type Size = 'sm' | 'md' | 'lg'
+/** 只有两档 —— `lg` 曾存在但从未被使用，删掉比留着维护它便宜 */
+type Size = 'sm' | 'md'
 
 interface Ripple {
   id: number
@@ -29,14 +30,12 @@ const VARIANT_CLASS: Record<Variant, string> = {
 
 const SIZE_CLASS: Record<Size, string> = {
   sm: 'h-8 px-3 text-[13px] gap-1.5',
-  md: 'h-9 px-4 text-sm gap-2',
-  lg: 'h-10 px-5 text-sm gap-2'
+  md: 'h-9 px-4 text-sm gap-2'
 }
 
 const ICON_SIZE_CLASS: Record<Size, string> = {
   sm: 'h-8 w-8',
-  md: 'h-9 w-9',
-  lg: 'h-10 w-10'
+  md: 'h-9 w-9'
 }
 
 export default function Button({

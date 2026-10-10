@@ -1,6 +1,6 @@
 import { useResumeStore } from '@/store/resumeStore'
 import { TextField, TextArea, ValidatedTextField } from '@/components/ui/TextField'
-import { checkDateRange, checkGpa } from '@/utils/validators'
+import { checkDateRange, checkGpa, errorOf } from '@/utils/validators'
 import EmptyState from '@/components/ui/EmptyState'
 import { FormHeader, EntryCard } from '../FormScaffold'
 import { IconGraduationCap } from '@/components/ui/Icons'
@@ -32,8 +32,7 @@ export default function EducationForm() {
         <div className="space-y-4">
           {list.map((edu, i) => {
             // 起止时间跨两个字段，错误要同时标在两处
-            const rangeCheck = checkDateRange(edu.startDate, edu.endDate)
-            const rangeError = rangeCheck.ok ? undefined : rangeCheck.message
+            const rangeError = errorOf(checkDateRange(edu.startDate, edu.endDate))
 
             return (
             <EntryCard key={edu.id} index={i} label="教育经历" onRemove={() => remove(edu.id)}>

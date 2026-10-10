@@ -3,15 +3,18 @@ import type { ResumeIssue, ResumeCheckResult, SectionKey } from '@/types/optimiz
 import { isEmail, isMobile, isLandline, isUrl, isGithubUsername, normalizeGithub } from './validators'
 
 // ====== 规则类型 ======
-type CheckRule = (data: ResumeData) => ResumeIssue | null
 
-let issueCounter = 0
-function issueId(): string {
-  return `issue-${++issueCounter}`
-}
+/** 规则产出的问题**不带 id** —— id 由 checkResume 在汇总时按顺序统一分配。 */
+type NewIssue = Omit<ResumeIssue, 'id'>
+type CheckRule = (data: ResumeData) => NewIssue | null
 
+/**
+ * 曾经这里有一个模块级的 `issueCounter`，靠自增发号。
+ * 问题是：id 取决于「本次进程里第几次调用」，同一份简历在不同时刻会得到不同 id，
+ * 还让规则带上了隐藏的调用顺序依赖。现在 id 由汇总处的下标决定 ——
+ * 同样的输入必然得到同样的输出。
+ */
 function makeIssue(
-  id: string,
   severity: ResumeIssue['severity'],
   category: ResumeIssue['category'],
   section: ResumeIssue['section'],
@@ -20,8 +23,8 @@ function makeIssue(
   description: string,
   suggestion: string,
   currentValue?: string
-): ResumeIssue {
-  return { id, severity, category, section, field, title, description, suggestion, currentValue }
+): NewIssue {
+  return { severity, category, section, field, title, description, suggestion, currentValue }
 }
 
 // ====== 1. 完整性检查规则 ======
@@ -30,7 +33,6 @@ const completenessRules: CheckRule[] = [
   (data) => {
     if (!data.personalInfo.fullName.trim()) {
       return makeIssue(
-        issueId(),
         'critical',
         'completeness',
         'personalInfo',
@@ -46,7 +48,6 @@ const completenessRules: CheckRule[] = [
   (data) => {
     if (!data.personalInfo.email.trim()) {
       return makeIssue(
-        issueId(),
         'critical',
         'completeness',
         'personalInfo',
@@ -62,7 +63,6 @@ const completenessRules: CheckRule[] = [
   (data) => {
     if (!data.personalInfo.phone.trim()) {
       return makeIssue(
-        issueId(),
         'critical',
         'completeness',
         'personalInfo',
@@ -78,7 +78,6 @@ const completenessRules: CheckRule[] = [
   (data) => {
     if (!data.personalInfo.title.trim()) {
       return makeIssue(
-        issueId(),
         'critical',
         'completeness',
         'personalInfo',
@@ -94,7 +93,6 @@ const completenessRules: CheckRule[] = [
   (data) => {
     if (data.education.length === 0) {
       return makeIssue(
-        issueId(),
         'critical',
         'completeness',
         'education',
@@ -110,7 +108,6 @@ const completenessRules: CheckRule[] = [
   (data) => {
     if (data.workExperience.length === 0) {
       return makeIssue(
-        issueId(),
         'critical',
         'completeness',
         'workExperience',
@@ -126,7 +123,6 @@ const completenessRules: CheckRule[] = [
   (data) => {
     if (!data.summary.trim()) {
       return makeIssue(
-        issueId(),
         'critical',
         'completeness',
         'summary',
@@ -142,7 +138,6 @@ const completenessRules: CheckRule[] = [
   (data) => {
     if (data.skills.length === 0) {
       return makeIssue(
-        issueId(),
         'warning',
         'completeness',
         'skills',
@@ -167,7 +162,6 @@ const formatRules: CheckRule[] = [
     const email = data.personalInfo.email.trim()
     if (email && !isEmail(email)) {
       return makeIssue(
-        issueId(),
         'warning',
         'format',
         'personalInfo',
@@ -186,7 +180,6 @@ const formatRules: CheckRule[] = [
     // 手机号或带区号的固定电话都算合法，与表单就地校验保持一致
     if (raw && !isMobile(raw) && !isLandline(raw)) {
       return makeIssue(
-        issueId(),
         'warning',
         'format',
         'personalInfo',
@@ -204,7 +197,6 @@ const formatRules: CheckRule[] = [
     const website = data.personalInfo.website?.trim()
     if (website && !isUrl(website)) {
       return makeIssue(
-        issueId(),
         'info',
         'format',
         'personalInfo',
@@ -222,7 +214,6 @@ const formatRules: CheckRule[] = [
     const github = data.personalInfo.github?.trim()
     if (github && !isGithubUsername(normalizeGithub(github))) {
       return makeIssue(
-        issueId(),
         'info',
         'format',
         'personalInfo',
@@ -270,7 +261,6 @@ const qualityRules: CheckRule[] = [
     const len = data.summary.trim().length
     if (len > 0 && len < 50) {
       return makeIssue(
-        issueId(),
         'warning',
         'quality',
         'summary',
@@ -288,7 +278,6 @@ const qualityRules: CheckRule[] = [
     const len = data.summary.trim().length
     if (len > 300) {
       return makeIssue(
-        issueId(),
         'info',
         'quality',
         'summary',
@@ -315,7 +304,6 @@ const qualityRules: CheckRule[] = [
         .map((v) => `"${v}" → ${STRONG_VERB_SUGGESTIONS[v] || '更具体的动词'}`)
         .join('；')
       return makeIssue(
-        issueId(),
         'warning',
         'quality',
         'summary',
@@ -340,7 +328,6 @@ const consistencyRules: CheckRule[] = [
   (data) => {
     if (data.skills.length > 20) {
       return makeIssue(
-        issueId(),
         'info',
         'consistency',
         'skills',
@@ -360,13 +347,12 @@ const consistencyRules: CheckRule[] = [
 /**
  * 为每条教育经历生成日期检查规则
  */
-function educationDateRules(data: ResumeData): ResumeIssue[] {
-  const issues: ResumeIssue[] = []
+function educationDateRules(data: ResumeData): NewIssue[] {
+  const issues: NewIssue[] = []
   for (const edu of data.education) {
     if (edu.startDate && edu.endDate && edu.startDate > edu.endDate) {
       issues.push(
         makeIssue(
-          issueId(),
           'warning',
           'format',
           'education',
@@ -385,8 +371,8 @@ function educationDateRules(data: ResumeData): ResumeIssue[] {
 /**
  * 为每条工作经历生成日期和内容检查规则
  */
-function workExperienceRules(data: ResumeData): ResumeIssue[] {
-  const issues: ResumeIssue[] = []
+function workExperienceRules(data: ResumeData): NewIssue[] {
+  const issues: NewIssue[] = []
   for (const work of data.workExperience) {
     const label = work.company || '未命名公司'
 
@@ -394,7 +380,6 @@ function workExperienceRules(data: ResumeData): ResumeIssue[] {
     if (!work.isCurrent && work.startDate && work.endDate && work.startDate > work.endDate) {
       issues.push(
         makeIssue(
-          issueId(),
           'warning',
           'format',
           'workExperience',
@@ -412,7 +397,6 @@ function workExperienceRules(data: ResumeData): ResumeIssue[] {
     if (validAchievements.length === 0) {
       issues.push(
         makeIssue(
-          issueId(),
           'warning',
           'quality',
           'workExperience',
@@ -426,7 +410,6 @@ function workExperienceRules(data: ResumeData): ResumeIssue[] {
     } else if (validAchievements.length < 2) {
       issues.push(
         makeIssue(
-          issueId(),
           'info',
           'quality',
           'workExperience',
@@ -443,7 +426,6 @@ function workExperienceRules(data: ResumeData): ResumeIssue[] {
     if (work.description.trim() && !/\d/.test(work.description)) {
       issues.push(
         makeIssue(
-          issueId(),
           'info',
           'quality',
           'workExperience',
@@ -467,7 +449,6 @@ function workExperienceRules(data: ResumeData): ResumeIssue[] {
     if (weakVerbsInWork.length > 0) {
       issues.push(
         makeIssue(
-          issueId(),
           'info',
           'quality',
           'workExperience',
@@ -486,8 +467,8 @@ function workExperienceRules(data: ResumeData): ResumeIssue[] {
 /**
  * 为每条项目经历生成检查规则
  */
-function projectRules(data: ResumeData): ResumeIssue[] {
-  const issues: ResumeIssue[] = []
+function projectRules(data: ResumeData): NewIssue[] {
+  const issues: NewIssue[] = []
   for (const proj of data.projects) {
     const label = proj.name || '未命名项目'
 
@@ -499,7 +480,6 @@ function projectRules(data: ResumeData): ResumeIssue[] {
     ) {
       issues.push(
         makeIssue(
-          issueId(),
           'warning',
           'format',
           'projects',
@@ -517,7 +497,6 @@ function projectRules(data: ResumeData): ResumeIssue[] {
     if (validHighlights.length === 0) {
       issues.push(
         makeIssue(
-          issueId(),
           'info',
           'quality',
           'projects',
@@ -534,7 +513,6 @@ function projectRules(data: ResumeData): ResumeIssue[] {
     if (proj.technologies.filter((t) => t.trim()).length === 0) {
       issues.push(
         makeIssue(
-          issueId(),
           'info',
           'quality',
           'projects',
@@ -552,8 +530,8 @@ function projectRules(data: ResumeData): ResumeIssue[] {
 /**
  * 时间空档检查
  */
-function gapCheck(data: ResumeData): ResumeIssue[] {
-  const issues: ResumeIssue[] = []
+function gapCheck(data: ResumeData): NewIssue[] {
+  const issues: NewIssue[] = []
   const allDates: { label: string; start: string; end: string; section: SectionKey }[] = []
 
   for (const edu of data.education) {
@@ -582,7 +560,6 @@ function gapCheck(data: ResumeData): ResumeIssue[] {
       if (gapMonths > 12) {
         issues.push(
           makeIssue(
-            issueId(),
             'info',
             'consistency',
             prev.section,
@@ -609,63 +586,58 @@ function monthDiff(d1: string, d2: string): number {
 // ====== 主检查函数 ======
 
 export function checkResume(data: ResumeData): ResumeCheckResult {
-  // 重置计数器
-  issueCounter = 0
-
-  const allIssues: ResumeIssue[] = []
+  const collected: NewIssue[] = []
 
   // 1. 完整性规则
   for (const rule of completenessRules) {
     const issue = rule(data)
-    if (issue) allIssues.push(issue)
+    if (issue) collected.push(issue)
   }
 
   // 2. 格式规则
   for (const rule of formatRules) {
     const issue = rule(data)
-    if (issue) allIssues.push(issue)
+    if (issue) collected.push(issue)
   }
 
   // 3. 动态规则 - 教育经历
-  allIssues.push(...educationDateRules(data))
+  collected.push(...educationDateRules(data))
 
   // 4. 动态规则 - 工作经历
-  allIssues.push(...workExperienceRules(data))
+  collected.push(...workExperienceRules(data))
 
   // 5. 动态规则 - 项目经历
-  allIssues.push(...projectRules(data))
+  collected.push(...projectRules(data))
 
   // 6. 表达质量规则
   for (const rule of qualityRules) {
     const issue = rule(data)
-    if (issue) allIssues.push(issue)
+    if (issue) collected.push(issue)
   }
 
   // 7. 一致性规则
   for (const rule of consistencyRules) {
     const issue = rule(data)
-    if (issue) allIssues.push(issue)
+    if (issue) collected.push(issue)
   }
 
   // 8. 时间空档检查
-  allIssues.push(...gapCheck(data))
+  collected.push(...gapCheck(data))
 
-  // 计算统计
-  const critical = allIssues.filter((i) => i.severity === 'critical').length
-  const warning = allIssues.filter((i) => i.severity === 'warning').length
-  const info = allIssues.filter((i) => i.severity === 'info').length
+  // id 在此统一分配：同样的输入必然得到同样的 id
+  const allIssues: ResumeIssue[] = collected.map((issue, i) => ({ ...issue, id: `issue-${i}` }))
+
+  const count = (severity: ResumeIssue['severity']) =>
+    allIssues.filter((i) => i.severity === severity).length
+  const critical = count('critical')
+  const warning = count('warning')
+  const info = count('info')
 
   // 评分：满分 100，每条 critical -10，每条 warning -3，每条 info -1，最低 0
   const score = Math.max(0, 100 - critical * 10 - warning * 3 - info * 1)
 
   return {
-    summary: {
-      totalIssues: allIssues.length,
-      critical,
-      warning,
-      info,
-      score
-    },
+    summary: { totalIssues: allIssues.length, critical, warning, info, score },
     issues: allIssues,
     checkedAt: new Date().toISOString()
   }

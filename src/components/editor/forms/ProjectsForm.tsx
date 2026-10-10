@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useResumeStore } from '@/store/resumeStore'
 import { TextField, TextArea, ValidatedTextField } from '@/components/ui/TextField'
-import { checkDateRange, checkLink } from '@/utils/validators'
+import { checkDateRange, checkLink, errorOf } from '@/utils/validators'
 import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
 import { FormHeader, EntryCard } from '../FormScaffold'
@@ -67,8 +67,7 @@ export default function ProjectsForm() {
         <div className="space-y-4">
           {list.map((proj, i) => {
             // 起止时间跨两个字段，错误同时标在两处
-            const rangeCheck = checkDateRange(proj.startDate, proj.endDate ?? '')
-            const rangeError = rangeCheck.ok ? undefined : rangeCheck.message
+            const rangeError = errorOf(checkDateRange(proj.startDate, proj.endDate ?? ''))
 
             return (
             <EntryCard key={proj.id} index={i} label="项目经历" onRemove={() => remove(proj.id)}>

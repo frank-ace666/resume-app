@@ -5,7 +5,7 @@ import {
   type ReactNode,
   type TextareaHTMLAttributes
 } from 'react'
-import type { FieldCheck } from '@/utils/validators'
+import { errorOf, type FieldCheck } from '@/utils/validators'
 import { IconAlert } from './Icons'
 
 /**
@@ -168,7 +168,7 @@ export function ValidatedTextField({ validate, value, onBlur, ...rest }: Validat
     <TextField
       {...rest}
       value={value}
-      error={result && !result.ok ? result.message : undefined}
+      error={errorOf(result ?? { ok: true })}
       onBlur={(e) => {
         setTouched(true)
         onBlur?.(e)

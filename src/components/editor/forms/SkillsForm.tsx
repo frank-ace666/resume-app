@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button'
 import Card from '@/components/ui/Card'
 import { FormHeader } from '../FormScaffold'
 import { IconPlus, IconTrash, IconWrench } from '@/components/ui/Icons'
-import { groupSkills } from '@/components/templates/shared'
+import { groupSkills } from '@/components/templates/model'
 
 const LEVELS: { value: SkillLevel; label: string }[] = [
   { value: 'beginner', label: '入门' },

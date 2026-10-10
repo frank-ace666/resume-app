@@ -301,6 +301,25 @@ Tailwind v4 的工具类都在 `@layer utilities` 里，所以项目自定义样
 
 字体/字号/行高这类非颜色样式仍可正常使用 Tailwind 类（`TYPE` 常量即是）。
 
+### 模板的分层：模型归一化，模板只管摆放
+
+```
+ResumeData ──buildResumeModel()──▶ ResumeModel ──▶ 三个模板（纯 JSX）
+              templates/model.ts                    Classic / Modern / Minimal
+```
+
+**为什么要这一层**：三个模板此前各自判断「这条经历是不是空的」「日期怎么拼」
+「熟练度显示成什么字」—— 同一个决定做三遍，改一处忘两处是迟早的事。
+现在归一化只做一次，模板里不再有 `if (!x) return null`、`nonEmpty()`、`?.trim()`：
+拿到的数组里没有空条目，字段都是可直接渲染的字符串。
+
+**边界要守住**：归一化进模型，**排版留在模板**。
+三者怎么摆是刻意的差异（时间在右、职位是否另起一行、技能是分组还是横排），
+不该被"统一"掉。
+
+- 数据归一化（含空值剔除、日期拼接、技能分组）→ `templates/model.ts`
+- 排版尺度与打印色板 → `templates/shared.tsx`
+
 ### 模板样式策略
 
 - 排版尺度统一由 `shared.tsx` 的 `TYPE` 提供：姓名 22px/700、分区标题 13px/700、正文 13px/1.55、日期 11.5px
@@ -517,17 +536,21 @@ Electron (2)：electron/main/index.ts, electron/preload/index.ts
 布局组件 (4)：components/layout/AppBar.tsx, NavDrawer.tsx, MainLayout.tsx,
               StatusBar.tsx（ErrorBoundary 在 components/ 根下）
 
-编辑器 (11)：components/editor/EditorPanel.tsx, TemplateSelector.tsx,
+编辑器 (10)：components/editor/EditorPanel.tsx, TemplateSelector.tsx,
              AccentPicker.tsx, FormScaffold.tsx
              forms/PersonalInfoForm.tsx, EducationForm.tsx,
              WorkExperienceForm.tsx, SkillsForm.tsx, ProjectsForm.tsx,
              SummaryForm.tsx, OptimizationForm.tsx
 
+帮助模块 (7)：components/editor/help/HelpForm.tsx（外壳，只管选栏）
+              FaqView.tsx, ReleasesView.tsx, FeedbackView.tsx,
+              ContributeView.tsx, EmailActions.tsx, richText.tsx
+
 预览器 (3)：components/preview/PreviewPanel.tsx, PreviewToolbar.tsx,
             ResumePreview.tsx
 
-模板 (4)：components/templates/ClassicTemplate.tsx, ModernTemplate.tsx,
-          MinimalTemplate.tsx, shared.tsx
+模板 (5)：components/templates/model.ts（数据归一化）, shared.tsx（排版令牌）,
+          ClassicTemplate.tsx, ModernTemplate.tsx, MinimalTemplate.tsx
 
 Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
            hooks/useResizable.ts, hooks/usePdfExport.ts
