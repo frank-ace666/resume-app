@@ -60,7 +60,7 @@ export default function WorkExperienceForm() {
                   error={rangeError}
                 />
                 <TextField
-                  label="结束时间"
+                  label="结束时间（选填）"
                   type="month"
                   value={work.endDate}
                   disabled={work.isCurrent}
@@ -99,7 +99,7 @@ export default function WorkExperienceForm() {
               </div>
 
               <TextArea
-                label="工作概述"
+                label="工作概述（选填）"
                 placeholder="一句话说明你的职责范围"
                 value={work.description}
                 onChange={(e) => update(work.id, { description: e.target.value })}

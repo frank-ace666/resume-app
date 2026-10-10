@@ -71,8 +71,8 @@ export default function EducationForm() {
                   error={rangeError}
                 />
                 <ValidatedTextField
-                  label="GPA / 成绩"
-                  placeholder="如：3.8/4.0（选填）"
+                  label="GPA / 成绩（选填）"
+                  placeholder="如：3.8/4.0"
                   value={edu.gpa ?? ''}
                   onChange={(e) => update(edu.id, { gpa: e.target.value })}
                   validate={checkGpa}

@@ -51,25 +51,25 @@ const FIELDS: FieldDef[] = [
     icon: <IconPhone size={16} />,
     validate: checkPhone
   },
-  { key: 'location', label: '所在地', placeholder: '如：北京', icon: <IconMapPin size={16} /> },
+  { key: 'location', label: '所在地（选填）', placeholder: '如：北京', icon: <IconMapPin size={16} /> },
   {
     key: 'website',
-    label: '个人网站',
-    placeholder: 'https://（选填）',
+    label: '个人网站（选填）',
+    placeholder: 'https://example.dev',
     icon: <IconGlobe size={16} />,
     validate: (v) => checkUrl(v, '个人网站')
   },
   {
     key: 'github',
-    label: 'GitHub',
-    placeholder: '用户名或主页链接（选填）',
+    label: 'GitHub（选填）',
+    placeholder: '用户名或主页链接',
     icon: <IconGithub size={16} />,
     validate: checkGithub
   },
   {
     key: 'linkedin',
-    label: 'LinkedIn',
-    placeholder: '用户名或链接（选填）',
+    label: 'LinkedIn（选填）',
+    placeholder: '用户名或链接',
     icon: <IconLinkedin size={16} />,
     validate: checkLinkedin
   }
@@ -194,7 +194,10 @@ export default function PersonalInfoForm() {
     <div className="space-y-5">
       <div>
         <h2 className="text-base font-medium text-ink">个人信息</h2>
-        <p className="mt-1 text-sm text-ink-2">填写基本信息与求职意向，让 HR 一眼了解你。</p>
+        <p className="mt-1 text-sm text-ink-2">
+          填写基本信息与求职意向，让 HR 一眼了解你。
+          <span className="text-ink-3">标注「选填」的可以留空。</span>
+        </p>
       </div>
 
       <AvatarUploader />
