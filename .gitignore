@@ -1,9 +1,13 @@
 node_modules/
 dist/
+dist-*/
 out/
 *.log
 .DS_Store
 Thumbs.db
+
+# 本地视觉校验产物（截图、对比图），只在本机用，不进仓库
+.visual-check/
 
 # 个人收款码。是作者本人的收款码，不应随仓库分发；
 # 需要用「支持我」栏时再从本地引用（见 src/data/product.ts 的 donationImage 注释）
