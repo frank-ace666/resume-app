@@ -566,7 +566,26 @@ Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
 
 入口 (5)：index.html, src/main.tsx, src/App.tsx, src/index.css, src/global.d.ts
 
-资源 (1)：resources/icon.png（打包图标；由 SVG 形状程序化生成）
+资源 (3)：resources/icon.ico（**打包实际使用**，7 档尺寸的多分辨率图标）、
+          resources/icon-2.png（1024×1024 设计稿，当前主图标）、
+          resources/icon-1.png（备用图标）
+
+### 换图标怎么做
+
+`build.win.icon` 指向的是 **`icon.ico`**，不是设计稿 PNG —— Windows 会在
+16/24/32/48/256 等多个尺寸下渲染图标，把一张 1024px 的图直接丢给系统降采样，
+小尺寸会明显发虚。所以先由设计稿生成一份多分辨率 ico：
+
+1. 把新的设计稿放进 `resources/`
+2. 用浏览器 canvas 或任意工具导出 16/24/32/48/64/128/256 七档 PNG
+3. 打包成 ico（PNG 压缩的 ico 在 Windows Vista 之后均受支持）
+4. 替换 `resources/icon.ico` 后重新 `npm run package`
+
+> ⚠️ **插画风图标在小尺寸会糊。** 当前图标满幅带边框，中间的"纸"只占画布约 55%，
+> 缩到 16px 时纸仅约 9px 宽，还要画人像与六行文字，物理上无法辨认。
+> 实测 48px 起才清晰，32px 勉强可辨，16px 基本是一团色块。
+> 这是 Windows 与 macOS 的差异：Windows 大量使用 16/32px（任务栏、文件列表），
+> macOS Dock 最少 64pt。要改善只能出一版**去掉外框、内容放大**的小尺寸专用图。
 
 示例 (1)：samples/sample-frontend.json（虚构的示例简历，用于查看排版效果）
 
