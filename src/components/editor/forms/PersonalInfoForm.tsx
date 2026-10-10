@@ -1,7 +1,8 @@
 import { useCallback, useRef, useState } from 'react'
 import { useResumeStore } from '@/store/resumeStore'
+import type { PersonalInfo } from '@/types/resume'
 import { toast } from '@/store/toastStore'
-import { TextField } from '@/components/ui/TextField'
+import { TextField, ValidatedTextField } from '@/components/ui/TextField'
 import Button from '@/components/ui/Button'
 import {
   IconCamera,
@@ -15,17 +16,64 @@ import {
   IconUser
 } from '@/components/ui/Icons'
 import { fileToSquareDataUrl } from '@/utils/image'
+import {
+  checkEmail,
+  checkGithub,
+  checkLinkedin,
+  checkPhone,
+  checkUrl,
+  type FieldCheck
+} from '@/utils/validators'
 
-const FIELDS = [
+interface FieldDef {
+  key: keyof PersonalInfo
+  label: string
+  placeholder: string
+  icon?: React.ReactNode
+  /** 有 validate 的字段会在失焦后就地校验 */
+  validate?: (v: string) => FieldCheck
+}
+
+const FIELDS: FieldDef[] = [
   { key: 'fullName', label: '姓名', placeholder: '你的全名', icon: <IconUser size={16} /> },
-  { key: 'title', label: '求职意向', placeholder: '如：前端开发工程师', icon: null },
-  { key: 'email', label: '邮箱', placeholder: 'example@email.com', icon: <IconMail size={16} /> },
-  { key: 'phone', label: '电话', placeholder: '手机号码', icon: <IconPhone size={16} /> },
+  { key: 'title', label: '求职意向', placeholder: '如：前端开发工程师' },
+  {
+    key: 'email',
+    label: '邮箱',
+    placeholder: 'example@email.com',
+    icon: <IconMail size={16} />,
+    validate: checkEmail
+  },
+  {
+    key: 'phone',
+    label: '电话',
+    placeholder: '手机号码或带区号的固话',
+    icon: <IconPhone size={16} />,
+    validate: checkPhone
+  },
   { key: 'location', label: '所在地', placeholder: '如：北京', icon: <IconMapPin size={16} /> },
-  { key: 'website', label: '个人网站', placeholder: 'https://（选填）', icon: <IconGlobe size={16} /> },
-  { key: 'github', label: 'GitHub', placeholder: 'GitHub 用户名（选填）', icon: <IconGithub size={16} /> },
-  { key: 'linkedin', label: 'LinkedIn', placeholder: 'LinkedIn 链接（选填）', icon: <IconLinkedin size={16} /> }
-] as const
+  {
+    key: 'website',
+    label: '个人网站',
+    placeholder: 'https://（选填）',
+    icon: <IconGlobe size={16} />,
+    validate: (v) => checkUrl(v, '个人网站')
+  },
+  {
+    key: 'github',
+    label: 'GitHub',
+    placeholder: '用户名或主页链接（选填）',
+    icon: <IconGithub size={16} />,
+    validate: checkGithub
+  },
+  {
+    key: 'linkedin',
+    label: 'LinkedIn',
+    placeholder: '用户名或链接（选填）',
+    icon: <IconLinkedin size={16} />,
+    validate: checkLinkedin
+  }
+]
 
 function AvatarUploader() {
   const avatar = useResumeStore((s) => s.data.personalInfo.avatar)
@@ -146,25 +194,30 @@ export default function PersonalInfoForm() {
     <div className="space-y-5">
       <div>
         <h2 className="text-base font-medium text-ink">个人信息</h2>
-        <p className="mt-1 text-sm text-ink-2">
-          填写基本信息与求职意向，让 HR 一眼了解你。
-        </p>
+        <p className="mt-1 text-sm text-ink-2">填写基本信息与求职意向，让 HR 一眼了解你。</p>
       </div>
 
       <AvatarUploader />
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {FIELDS.map((f) => (
-          <TextField
-            key={f.key}
-            label={f.label}
-            placeholder={f.placeholder}
-            value={String(info[f.key] ?? '')}
-            onChange={(e) => update({ [f.key]: e.target.value })}
-            addon={f.icon}
-            className={f.key === 'fullName' || f.key === 'title' ? 'sm:col-span-2' : ''}
-          />
-        ))}
+        {FIELDS.map((f) => {
+          const value = String(info[f.key] ?? '')
+          const shared = {
+            label: f.label,
+            placeholder: f.placeholder,
+            value,
+            onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+              update({ [f.key]: e.target.value }),
+            addon: f.icon,
+            className: f.key === 'fullName' || f.key === 'title' ? 'sm:col-span-2' : ''
+          }
+
+          return f.validate ? (
+            <ValidatedTextField key={f.key} {...shared} validate={f.validate} />
+          ) : (
+            <TextField key={f.key} {...shared} />
+          )
+        })}
       </div>
     </div>
   )

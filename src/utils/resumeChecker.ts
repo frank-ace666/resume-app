@@ -1,5 +1,6 @@
 import type { ResumeData } from '@/types/resume'
 import type { ResumeIssue, ResumeCheckResult, SectionKey } from '@/types/optimization'
+import { isEmail, isMobile, isLandline, isUrl, isGithubUsername, normalizeGithub } from './validators'
 
 // ====== 规则类型 ======
 type CheckRule = (data: ResumeData) => ResumeIssue | null
@@ -157,14 +158,14 @@ const completenessRules: CheckRule[] = [
 
 // ====== 2. 格式检查规则 ======
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const PHONE_REGEX = /^1[3-9]\d{9}$/
-const URL_REGEX = /^https?:\/\/.+\..+/
+// 谓词统一来自 utils/validators.ts —— 表单就地校验与检查报告共用同一套判断，
+// 否则两处正则各写一遍，早晚会出现「输入框说没问题、检查报告说有问题」。
+// 提示文案仍各自维护：就地校验要短，检查报告要解释清楚为什么、怎么改。
 
 const formatRules: CheckRule[] = [
   (data) => {
     const email = data.personalInfo.email.trim()
-    if (email && !EMAIL_REGEX.test(email)) {
+    if (email && !isEmail(email)) {
       return makeIssue(
         issueId(),
         'warning',
@@ -181,8 +182,9 @@ const formatRules: CheckRule[] = [
   },
 
   (data) => {
-    const phone = data.personalInfo.phone.trim().replace(/\s|-/g, '')
-    if (phone && !PHONE_REGEX.test(phone) && phone.length > 0) {
+    const raw = data.personalInfo.phone.trim()
+    // 手机号或带区号的固定电话都算合法，与表单就地校验保持一致
+    if (raw && !isMobile(raw) && !isLandline(raw)) {
       return makeIssue(
         issueId(),
         'warning',
@@ -200,7 +202,7 @@ const formatRules: CheckRule[] = [
 
   (data) => {
     const website = data.personalInfo.website?.trim()
-    if (website && !URL_REGEX.test(website)) {
+    if (website && !isUrl(website)) {
       return makeIssue(
         issueId(),
         'info',
@@ -218,7 +220,7 @@ const formatRules: CheckRule[] = [
 
   (data) => {
     const github = data.personalInfo.github?.trim()
-    if (github && /[^a-zA-Z0-9\-_]/.test(github)) {
+    if (github && !isGithubUsername(normalizeGithub(github))) {
       return makeIssue(
         issueId(),
         'info',

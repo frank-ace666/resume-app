@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useResumeStore } from '@/store/resumeStore'
-import { TextField, TextArea } from '@/components/ui/TextField'
+import { TextField, TextArea, ValidatedTextField } from '@/components/ui/TextField'
+import { checkDateRange, checkLink } from '@/utils/validators'
 import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
 import { FormHeader, EntryCard } from '../FormScaffold'
@@ -64,7 +65,12 @@ export default function ProjectsForm() {
         />
       ) : (
         <div className="space-y-4">
-          {list.map((proj, i) => (
+          {list.map((proj, i) => {
+            // 起止时间跨两个字段，错误同时标在两处
+            const rangeCheck = checkDateRange(proj.startDate, proj.endDate ?? '')
+            const rangeError = rangeCheck.ok ? undefined : rangeCheck.message
+
+            return (
             <EntryCard key={proj.id} index={i} label="项目经历" onRemove={() => remove(proj.id)}>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <TextField
@@ -84,18 +90,21 @@ export default function ProjectsForm() {
                   type="month"
                   value={proj.startDate}
                   onChange={(e) => update(proj.id, { startDate: e.target.value })}
+                  error={rangeError}
                 />
                 <TextField
                   label="结束时间（选填）"
                   type="month"
                   value={proj.endDate ?? ''}
                   onChange={(e) => update(proj.id, { endDate: e.target.value })}
+                  error={rangeError}
                 />
-                <TextField
+                <ValidatedTextField
                   label="项目链接（选填）"
-                  placeholder="https:// 或 GitHub 仓库地址"
+                  placeholder="https:// 或 github.com/user/repo"
                   value={proj.link ?? ''}
                   onChange={(e) => update(proj.id, { link: e.target.value })}
+                  validate={(v) => checkLink(v, '项目链接')}
                   className="sm:col-span-2"
                 />
               </div>
@@ -191,7 +200,8 @@ export default function ProjectsForm() {
                 </Button>
               </div>
             </EntryCard>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

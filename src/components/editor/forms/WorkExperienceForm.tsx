@@ -1,5 +1,6 @@
 import { useResumeStore } from '@/store/resumeStore'
 import { TextField, TextArea } from '@/components/ui/TextField'
+import { checkDateRange } from '@/utils/validators'
 import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
 import { FormHeader, EntryCard } from '../FormScaffold'
@@ -30,7 +31,14 @@ export default function WorkExperienceForm() {
         />
       ) : (
         <div className="space-y-4">
-          {list.map((work, i) => (
+          {list.map((work, i) => {
+            // 起止时间跨两个字段，错误同时标在两处；勾了「至今」则不校验结束时间
+            const rangeCheck = checkDateRange(work.startDate, work.endDate, {
+              isCurrent: work.isCurrent
+            })
+            const rangeError = rangeCheck.ok ? undefined : rangeCheck.message
+
+            return (
             <EntryCard key={work.id} index={i} label="工作经历" onRemove={() => remove(work.id)}>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <TextField
@@ -50,6 +58,7 @@ export default function WorkExperienceForm() {
                   type="month"
                   value={work.startDate}
                   onChange={(e) => update(work.id, { startDate: e.target.value })}
+                  error={rangeError}
                 />
                 <TextField
                   label="结束时间"
@@ -57,6 +66,7 @@ export default function WorkExperienceForm() {
                   value={work.endDate}
                   disabled={work.isCurrent}
                   onChange={(e) => update(work.id, { endDate: e.target.value })}
+                  error={rangeError}
                   addon={
                     <>
                       <input
@@ -149,7 +159,8 @@ export default function WorkExperienceForm() {
                 </Button>
               </div>
             </EntryCard>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>

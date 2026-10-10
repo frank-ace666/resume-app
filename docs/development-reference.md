@@ -411,6 +411,25 @@ OptimizationForm   ──── 评分环 + 统计 + 问题列表 + 跳转
 
 ---
 
+### 与表单就地校验的关系（重要）
+
+格式类判断（邮箱 / 手机 / URL / GitHub / GPA / 日期顺序）的**谓词**统一放在
+`src/utils/validators.ts`，**本模块与表单共用**，只是提示文案各自写：
+
+| 调用方 | 时机 | 文案风格 |
+| ------ | ---- | -------- |
+| 表单（`ValidatedTextField`） | 失焦后就地报错，随输入实时消失 | 短、直接 |
+| 本模块（`formatRules`） | 用户点「开始检查」后汇总 | 长、解释为什么与怎么改 |
+
+**不要在本模块里重新写一份正则。** 两套判断并存必然漂移，用户会看到
+「输入框说没问题、检查报告说有问题」这种自相矛盾的结果。
+
+注意二者的职责边界：就地校验管**格式**，不管**必填**。
+空值在 `validators.ts` 中一律放过 —— 用户可能正填到一半，
+「哪里还缺内容」是检查模块的职责。
+
+---
+
 ## 十三、PDF 导出管线
 
 ### 为什么不用 `html2pdf-browser` 的 `html2pdf()`
@@ -498,9 +517,9 @@ Electron (2)：electron/main/index.ts, electron/preload/index.ts
 Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
            hooks/useResizable.ts, hooks/usePdfExport.ts
 
-工具 (8)：utils/fileIO.ts, utils/pdfExport.ts, utils/templateRegistry.ts,
-          utils/resumeChecker.ts, utils/sectionProgress.ts, utils/color.ts,
-          utils/accents.ts, utils/image.ts
+工具 (9)：utils/fileIO.ts, utils/pdfExport.ts, utils/templateRegistry.ts,
+          utils/resumeChecker.ts, utils/validators.ts, utils/sectionProgress.ts,
+          utils/color.ts, utils/accents.ts, utils/image.ts
 
 入口 (5)：index.html, src/main.tsx, src/App.tsx, src/index.css, src/global.d.ts
 

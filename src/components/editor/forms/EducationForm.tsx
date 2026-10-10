@@ -1,5 +1,6 @@
 import { useResumeStore } from '@/store/resumeStore'
-import { TextField, TextArea } from '@/components/ui/TextField'
+import { TextField, TextArea, ValidatedTextField } from '@/components/ui/TextField'
+import { checkDateRange, checkGpa } from '@/utils/validators'
 import EmptyState from '@/components/ui/EmptyState'
 import { FormHeader, EntryCard } from '../FormScaffold'
 import { IconGraduationCap } from '@/components/ui/Icons'
@@ -29,7 +30,12 @@ export default function EducationForm() {
         />
       ) : (
         <div className="space-y-4">
-          {list.map((edu, i) => (
+          {list.map((edu, i) => {
+            // 起止时间跨两个字段，错误要同时标在两处
+            const rangeCheck = checkDateRange(edu.startDate, edu.endDate)
+            const rangeError = rangeCheck.ok ? undefined : rangeCheck.message
+
+            return (
             <EntryCard key={edu.id} index={i} label="教育经历" onRemove={() => remove(edu.id)}>
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <TextField
@@ -56,18 +62,21 @@ export default function EducationForm() {
                   type="month"
                   value={edu.startDate}
                   onChange={(e) => update(edu.id, { startDate: e.target.value })}
+                  error={rangeError}
                 />
                 <TextField
                   label="毕业时间"
                   type="month"
                   value={edu.endDate}
                   onChange={(e) => update(edu.id, { endDate: e.target.value })}
+                  error={rangeError}
                 />
-                <TextField
+                <ValidatedTextField
                   label="GPA / 成绩"
                   placeholder="如：3.8/4.0（选填）"
                   value={edu.gpa ?? ''}
                   onChange={(e) => update(edu.id, { gpa: e.target.value })}
+                  validate={checkGpa}
                 />
               </div>
 
@@ -80,7 +89,8 @@ export default function EducationForm() {
                 className="mt-4"
               />
             </EntryCard>
-          ))}
+            )
+          })}
         </div>
       )}
     </div>
