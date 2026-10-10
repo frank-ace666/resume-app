@@ -25,6 +25,38 @@ export const KIND_LABEL: Record<Release['highlights'][number]['kind'], string> =
 
 export const RELEASES: Release[] = [
   {
+    version: '1.3.0',
+    date: '2026-10-10',
+    headline: '可以检查更新了，并修好了「换不了模板」',
+    highlights: [
+      {
+        kind: 'new',
+        title: '检查更新',
+        desc: '「帮助与反馈 → 更新日志」里新增检查更新。只在你自己点击时联网，不会自动下载或安装，发现新版本会给出下载页链接。'
+      },
+      {
+        kind: 'new',
+        title: '自定义联系方式',
+        desc: '个人信息里可以自行添加 QQ、微信、作品集等联系项，内置 16 个常用预设，也可完全自定义名称与校验类型。'
+      },
+      {
+        kind: 'fix',
+        title: '修好了换模板、换主题色没反应',
+        desc: '此前点击模板缩略图或主题色会静默失效，界面没有任何反馈（该问题在 1.2.0 中引入）。'
+      },
+      {
+        kind: 'fix',
+        title: '加了单实例锁',
+        desc: '此前双击两次快捷方式会开出两个窗口，它们共享同一份本地数据，可能互相覆盖导致简历内容丢失。'
+      },
+      {
+        kind: 'improve',
+        title: '选填项标注清楚',
+        desc: '「选填」改为写在字段名上（此前写在占位提示里，一开始输入就看不见了）。'
+      }
+    ]
+  },
+  {
     version: '1.2.0',
     date: '2026-10-10',
     headline: '界面重做 + 修复了「导出 PDF」完全不可用的问题',
