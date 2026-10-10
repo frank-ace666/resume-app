@@ -9,7 +9,7 @@
  * —— 就地校验要短，检查报告要解释清楚为什么、怎么改。
  */
 
-import type { ResumeData } from '@/types/resume'
+import type { ResumeData, ContactKind } from '@/types/resume'
 import type { SectionKey } from '@/types/optimization'
 
 export interface FieldCheck {
@@ -103,6 +103,50 @@ export function checkUrl(value: string, label = '网址'): FieldCheck {
   if (!/^https?:\/\//i.test(v)) return fail(`${label}需以 https:// 或 http:// 开头`)
   if (!isUrl(v)) return fail(`${label}格式不正确，请检查域名部分`)
   return OK
+}
+
+/* ============================================================
+   自定义联系项
+   ------------------------------------------------------------
+   用户能自己加字段（QQ、微信、作品集…），但**类型由程序提供**，
+   校验跟着类型走 —— 否则「随便加字段」等于「没有任何校验」。
+   ============================================================ */
+
+export const CONTACT_KIND_LABEL: Record<ContactKind, string> = {
+  text: '文本（不校验）',
+  number: '数字',
+  phone: '电话',
+  email: '邮箱',
+  url: '网址',
+  account: '账号'
+}
+
+/** 账号名：字母、数字、下划线、连字符、点 —— 微信号 / 微博名 / 掘金 ID 都落在这里 */
+const ACCOUNT_REGEX = /^[a-zA-Z0-9_.-]+$/
+
+export function checkContact(kind: ContactKind, value: string, label = '这项'): FieldCheck {
+  const v = value.trim()
+  if (!v) return OK
+
+  switch (kind) {
+    case 'number':
+      if (!/^\d+$/.test(v)) return fail(`${label}只能填数字`)
+      return OK
+    case 'phone':
+      return checkPhone(v)
+    case 'email':
+      return checkEmail(v)
+    case 'url':
+      return checkUrl(v, label)
+    case 'account':
+      if (hasCjk(v)) return fail(`${label}不应包含中文`)
+      if (/\s/.test(v)) return fail(`${label}不应包含空格`)
+      if (!ACCOUNT_REGEX.test(v)) return fail(`${label}只能包含字母、数字、下划线、连字符和点`)
+      return OK
+    case 'text':
+    default:
+      return OK
+  }
 }
 
 /**
@@ -208,6 +252,10 @@ export function collectResumeIssues(data: ResumeData): ResumeValidationIssue[] {
   push('personalInfo', '个人网站', checkUrl(p.website ?? '', '个人网站'))
   push('personalInfo', 'GitHub', checkGithub(p.github ?? ''))
   push('personalInfo', 'LinkedIn', checkLinkedin(p.linkedin ?? ''))
+  for (const f of p.customFields ?? []) {
+    const name = f.label?.trim() || '自定义字段'
+    push('personalInfo', name, checkContact(f.kind, f.value ?? '', name))
+  }
 
   // —— 教育经历 ——
   data.education.forEach((e, i) => {

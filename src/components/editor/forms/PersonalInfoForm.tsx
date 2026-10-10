@@ -16,6 +16,7 @@ import {
   IconUser
 } from '@/components/ui/Icons'
 import { fileToSquareDataUrl } from '@/utils/image'
+import CustomFieldsEditor from './CustomFieldsEditor'
 import {
   checkEmail,
   checkGithub,
@@ -221,6 +222,10 @@ export default function PersonalInfoForm() {
             <TextField key={f.key} {...shared} />
           )
         })}
+      </div>
+
+      <div className="border-t border-outline pt-5">
+        <CustomFieldsEditor />
       </div>
     </div>
   )

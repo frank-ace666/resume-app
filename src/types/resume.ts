@@ -1,4 +1,29 @@
 // ===== 个人信息 =====
+
+/**
+ * 自定义联系项的类型。用户自己决定字段叫什么，但**类型由程序提供** ——
+ * 校验规则跟着类型走，否则"用户随便加字段"就等于"没有任何校验"。
+ */
+export type ContactKind = 'text' | 'number' | 'phone' | 'email' | 'url' | 'account'
+
+/** 运行时校验用（normalizeResumeData 需要判断 kind 是否合法） */
+export const CONTACT_KINDS: ContactKind[] = [
+  'text',
+  'number',
+  'phone',
+  'email',
+  'url',
+  'account'
+]
+
+export interface CustomField {
+  id: string
+  /** 用户可见的名称，如「QQ」「微信」「作品集」 */
+  label: string
+  value: string
+  kind: ContactKind
+}
+
 export interface PersonalInfo {
   fullName: string
   email: string
@@ -9,6 +34,8 @@ export interface PersonalInfo {
   linkedin?: string
   github?: string
   avatar?: string // base64 头像
+  /** 用户自定义的联系项（QQ、微信、作品集…） */
+  customFields?: CustomField[]
 }
 
 // ===== 教育经历 =====
@@ -136,7 +163,16 @@ export function normalizeResumeData(raw: unknown): ResumeData {
       website: info.website,
       linkedin: info.linkedin,
       github: info.github,
-      avatar: info.avatar
+      avatar: info.avatar,
+      // 旧存档没有这一项；手改过的 JSON 里 kind 也可能是非法值
+      customFields: arr<CustomField>(info.customFields)
+        .filter((f) => f && typeof f.label === 'string')
+        .map((f) => ({
+          id: f.id || crypto.randomUUID(),
+          label: f.label ?? '',
+          value: f.value ?? '',
+          kind: CONTACT_KINDS.includes(f.kind) ? f.kind : 'text'
+        }))
     },
     summary: typeof input.summary === 'string' ? input.summary : '',
     education: arr<Education>(input.education).map((e) => ({

@@ -119,7 +119,7 @@ export function groupSkills(skills: Skill[]): SkillGroup[] {
 
 function buildContacts(data: ResumeData): string[] {
   const p = data.personalInfo
-  return clean([
+  const base = clean([
     p.phone,
     p.email,
     p.location,
@@ -128,6 +128,18 @@ function buildContacts(data: ResumeData): string[] {
     p.github ? `github.com/${p.github.replace(/^https?:\/\/(www\.)?github\.com\//i, '')}` : '',
     p.linkedin
   ])
+
+  // 自定义字段带名称前缀 —— 裸的 QQ 号或微信号在简历上无法辨认
+  const custom = (p.customFields ?? [])
+    .map((f) => {
+      const label = f.label?.trim()
+      const value = f.value?.trim()
+      if (!value) return '' // 未填的不出现在简历上
+      return label ? `${label}：${value}` : value
+    })
+    .filter(Boolean)
+
+  return [...base, ...custom]
 }
 
 export function buildResumeModel(data: ResumeData): ResumeModel {

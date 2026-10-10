@@ -1,6 +1,14 @@
 import type { ResumeData } from '@/types/resume'
 import type { ResumeIssue, ResumeCheckResult, SectionKey } from '@/types/optimization'
-import { isEmail, isMobile, isLandline, isUrl, isGithubUsername, normalizeGithub } from './validators'
+import {
+  isEmail,
+  isMobile,
+  isLandline,
+  isUrl,
+  isGithubUsername,
+  normalizeGithub,
+  checkContact
+} from './validators'
 
 // ====== 规则类型 ======
 
@@ -205,6 +213,29 @@ const formatRules: CheckRule[] = [
         `当前填写的 "${website}" 不是有效的 URL 格式。`,
         '请填写完整 URL，以 https:// 开头。',
         website
+      )
+    }
+    return null
+  },
+
+  // 自定义联系项：按用户选定的类型校验，与表单就地校验共用同一批谓词
+  (data) => {
+    for (const f of data.personalInfo.customFields ?? []) {
+      const value = f.value?.trim()
+      if (!value) continue
+      const name = f.label?.trim() || '自定义字段'
+      const result = checkContact(f.kind, value, name)
+      if (result.ok) continue
+
+      return makeIssue(
+        'info',
+        'format',
+        'personalInfo',
+        `personalInfo.customFields.${f.id}`,
+        `${name}格式可能有误`,
+        `当前填写的「${value}」不符合「${name}」的格式（类型：${f.kind}）。`,
+        result.message ?? '请检查格式，或在编辑处调整该项的类型。',
+        value
       )
     }
     return null
