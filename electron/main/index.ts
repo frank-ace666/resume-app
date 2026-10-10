@@ -5,6 +5,29 @@ import { readFile, writeFile } from 'fs/promises'
 let mainWindow: BrowserWindow | null = null
 
 /**
+ * 单实例锁。
+ *
+ * 不加的话，双击两次快捷方式会开出两个窗口，而它们**共享同一份 localStorage** ——
+ * 简历数据存在那里，两个实例各自持有内存副本、又都往同一处写，
+ * 后写的会覆盖先写的，用户会莫名其妙丢掉刚填的内容。
+ *
+ * （实测两个实例同时启动还会争抢同一个磁盘缓存目录，日志里刷
+ *  `Unable to move the cache: 拒绝访问`。）
+ *
+ * 拿不到锁说明已有实例在跑：直接退出，并把已有窗口唤到前台。
+ */
+if (!app.requestSingleInstanceLock()) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (!mainWindow) return
+    if (mainWindow.isMinimized()) mainWindow.restore()
+    mainWindow.show()
+    mainWindow.focus()
+  })
+}
+
+/**
  * 允许通过系统默认程序打开的外链协议白名单。
  *
  * 必须白名单：`shell.openExternal` 若接受任意协议，是一个已知的

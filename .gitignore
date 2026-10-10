@@ -4,3 +4,7 @@ out/
 *.log
 .DS_Store
 Thumbs.db
+
+# 个人收款码。是作者本人的收款码，不应随仓库分发；
+# 需要用「支持我」栏时再从本地引用（见 src/data/product.ts 的 donationImage 注释）
+support.jpg
