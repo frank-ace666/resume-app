@@ -15,13 +15,11 @@ import { TextArea } from '@/components/ui/TextField'
 import {
   IconCopy,
   IconExternal,
-  IconHeart,
   IconHelp,
   IconHistory,
   IconLightbulb,
   IconSearch,
   IconSend,
-  IconStar,
   IconThumbsDown,
   IconThumbsUp,
   IconUsers
@@ -246,13 +244,26 @@ function FaqView() {
         />
       )}
 
-      {/* 未解决兜底 */}
-      <Card className="flex flex-wrap items-center justify-between gap-3 bg-canvas p-4">
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-ink">没找到你的问题？</p>
-          <p className="mt-0.5 text-xs text-ink-2">直接发邮件，我会补进这个列表。</p>
+      {/* 未解决兜底。讨论区未配置时不出现 —— 不宣传尚不存在的渠道 */}
+      <Card className="bg-canvas p-4">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-ink">没找到你的问题？</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-ink-2">
+              直接发邮件，我会补进这个列表。
+            </p>
+            {hasLink(PRODUCT.communityUrl) && (
+              <button
+                onClick={() => openExternal(PRODUCT.communityUrl)}
+                className="mt-1.5 inline-flex items-center gap-1 text-xs text-brand transition-opacity hover:opacity-80"
+              >
+                <IconUsers size={13} />
+                也可以去讨论区问问
+              </button>
+            )}
+          </div>
+          <EmailActions subject="[提问]" primaryLabel="提问" />
         </div>
-        <EmailActions subject="[提问]" primaryLabel="提问" />
       </Card>
     </div>
   )
@@ -435,146 +446,13 @@ function ReleasesView() {
   )
 }
 
-/* ============ 视图 5：支持我 ============ */
-
-const SUPPORT_WAYS = [
-  {
-    title: '把问题发给我',
-    desc: '最实际的帮助。你遇到的 bug 和困惑，往往也是别人的，修掉一个就少一批人踩坑。'
-  },
-  {
-    title: '分享给正在找工作的同学',
-    desc: '这个应用完全免费、离线可用，没有账号也没有广告。'
-  },
-  {
-    title: '投稿内容',
-    desc: '模板、问答、措辞建议都算，见「投稿」一栏。'
-  },
-  {
-    title: '一句反馈',
-    desc: '哪怕只是说一句「用着还行」，对一个人维护的项目也是很大的鼓励。'
-  }
-]
-
-function SupportView() {
-  return (
-    <div className="space-y-4">
-      <Card className="p-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 shrink-0 text-danger">
-            <IconHeart size={20} />
-          </span>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-ink">这个项目没有收费计划</p>
-            <p className="mt-1 text-[13px] leading-relaxed text-ink-2">
-              没有账号体系、没有广告、也没有会员功能，全部功能免费且完全离线。
-              所以不需要花钱支持 —— 下面这些反而更有用：
-            </p>
-          </div>
-        </div>
-
-        <div className="mt-4 space-y-3">
-          {SUPPORT_WAYS.map((s, i) => (
-            <div key={s.title} className="flex gap-3">
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-soft text-[11px] font-semibold text-brand">
-                {i + 1}
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13px] font-medium text-ink">{s.title}</p>
-                <p className="text-xs leading-relaxed text-ink-2">{s.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </Card>
-
-      {/* 社区：地址未配置时不显示死链，如实说明并引导走邮件 */}
-      <Card className="p-4">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 shrink-0 text-brand">
-            <IconUsers size={18} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-ink">讨论区</p>
-            {hasLink(PRODUCT.communityUrl) ? (
-              <>
-                <p className="mt-1 text-xs leading-relaxed text-ink-2">
-                  有问题、想法或者想看看别人怎么写的，都可以去讨论区。
-                </p>
-                <Button
-                  variant="tonal"
-                  size="sm"
-                  className="mt-2.5"
-                  icon={<IconExternal size={14} />}
-                  onClick={() => openExternal(PRODUCT.communityUrl)}
-                >
-                  进入讨论区
-                </Button>
-              </>
-            ) : (
-              <>
-                <p className="mt-1 text-xs leading-relaxed text-ink-2">
-                  还没有开放。现在使用者还不多，开一个没人说话的讨论区反而是种负担，
-                  等积累一些用户后再开。在那之前，问题直接发邮件给我就行。
-                </p>
-                <Button
-                  variant="text"
-                  size="sm"
-                  className="mt-2"
-                  icon={<IconSend size={14} />}
-                  onClick={() =>
-                    openExternal(buildMailto({ subject: '[讨论] 简历工坊' }))
-                  }
-                >
-                  发邮件
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      {/* 仓库：同样按配置决定显隐 */}
-      {hasLink(PRODUCT.repoUrl) && (
-        <Card className="p-4">
-          <div className="flex items-start gap-3">
-            <span className="mt-0.5 shrink-0 text-warning">
-              <IconStar size={18} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-ink">给项目点个 star</p>
-              <p className="mt-1 text-xs leading-relaxed text-ink-2">
-                能让更多人看到这个项目，也不需要花一分钱。
-              </p>
-              <Button
-                variant="tonal"
-                size="sm"
-                className="mt-2.5"
-                icon={<IconExternal size={14} />}
-                onClick={() => openExternal(PRODUCT.repoUrl)}
-              >
-                打开仓库
-              </Button>
-            </div>
-          </div>
-        </Card>
-      )}
-
-      <Card className="space-y-3 p-4">
-        <EmailActions subject="[反馈] 简历工坊" primaryLabel="说点什么" />
-      </Card>
-    </div>
-  )
-}
-
 /* ============ 主组件 ============ */
 
 const SEGMENTS = [
   { key: 'faq', label: '常见问题', icon: <IconHelp size={15} /> },
   { key: 'releases', label: '更新日志', icon: <IconHistory size={15} /> },
   { key: 'feedback', label: '建议', icon: <IconLightbulb size={15} /> },
-  { key: 'contribute', label: '投稿', icon: <IconSend size={15} /> },
-  { key: 'support', label: '支持我', icon: <IconHeart size={15} /> }
+  { key: 'contribute', label: '投稿', icon: <IconSend size={15} /> }
 ]
 
 export default function HelpForm() {
@@ -599,7 +477,6 @@ export default function HelpForm() {
         {view === 'releases' && <ReleasesView />}
         {view === 'feedback' && <FeedbackView />}
         {view === 'contribute' && <ContributeView />}
-        {view === 'support' && <SupportView />}
       </div>
 
       {/* 页脚：邮箱常驻，任何视图下都能直接看到 */}
