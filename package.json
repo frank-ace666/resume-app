@@ -35,7 +35,8 @@
       "output": "dist"
     },
     "files": [
-      "out/**/*"
+      "out/**/*",
+      "!node_modules/**/*"
     ],
     "win": {
       "target": "nsis",
@@ -46,5 +47,9 @@
       "allowToChangeInstallationDirectory": true,
       "language": "2052"
     }
+  },
+  "author": {
+    "name": "frank-ace666",
+    "email": "aceg5166@gmail.com"
   }
 }

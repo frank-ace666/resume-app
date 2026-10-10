@@ -53,11 +53,33 @@ npm run build
 npm run package
 ```
 
-> 如果 Electron 下载失败（国内网络），使用镜像：
+> **国内网络**：Electron 二进制与 electron-builder 的打包依赖都托管在 GitHub，
+> 直连常失败。`install` 和 `package` 需要**两个不同的镜像**：
+>
 > ```bash
+> # 安装依赖时
 > set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
-> npx install-electron --no
+> npm install
+>
+> # 打包时（两个都要设，electron-builder 还要下 NSIS、7zip 等）
+> set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
+> set ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/
+> npm run package
 > ```
+>
+> Git Bash / PowerShell 下用 `export` / `$env:` 代替 `set`。
+> 这些是环境变量而非写进 `.npmrc` —— 免得给非中国网络的协作者强加镜像。
+
+## 📦 打包产物
+
+```
+dist/简历工坊 Setup <版本>.exe    NSIS 安装包（可选安装目录、中文界面）
+dist/win-unpacked/                免安装版，可直接运行其中的 exe
+```
+
+**安装包约 100 MB。** 体积几乎全部来自 Electron 运行时（自带 Chromium + Node），
+应用自身的代码只有约 1.7 MB（JS + CSS），压缩后占比可忽略。
+如果在意体积，只能换掉 Electron，而不是"优化代码"。
 
 ## 🏗️ 技术栈
 

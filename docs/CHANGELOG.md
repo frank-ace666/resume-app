@@ -57,6 +57,45 @@ html2canvas 解析颜色时抛错 → 导出彻底失败。而原先的 PDF 冒�
 - **模板选择器**：改为可视化缩略图（用 CSS 微缩还原三种版式结构）
 - **预览区**：适应宽度、Ctrl+滚轮缩放、网格背景、**分页参考线**（多页时标出每页边界）
 
+### 📦 打包流程验证 + 去除 28 MB 无用依赖
+
+`npm run package` 此前**从未跑过**（内测报告里列为未验证风险）。本次实跑并验证产物。
+
+**发现的问题**：`app.asar` 达 31 MB，内含完整 `node_modules`。但这些代码**运行时根本不会被加载**：
+
+```
+out/main/index.js     只 require: electron, fs/promises, path   ← 全为内置模块
+out/preload/index.js  只 require: electron
+out/renderer/*.js     零 require 调用（zustand / jspdf / html2pdf-browser 已被 Vite 内联）
+```
+
+electron-builder 默认把生产依赖树打进 asar，`files: ["out/**/*"]` 并不会关掉这个行为。
+加上 `"!node_modules/**/*"` 后：
+
+| 指标 | 修复前 | 修复后 |
+| ---- | ------ | ------ |
+| app.asar | 31 MB | **2.48 MB** |
+| 解包体积 | 384 MB | 357 MB |
+| 安装包 | 101.2 MB | 97.3 MB |
+
+安装包只小 4 MB —— 31 MB 的 JS 压缩后本就不大。真正的收益是**不再分发 28 MB 永远不会执行的代码**。
+
+**产物体积的真相**：安装包约 97 MB，其中应用代码只占 1.7 MB，其余全是 Electron 自带的
+Chromium + Node。想把体积降下来只能换掉 Electron，而不是"优化代码"。
+
+**同时修复**：
+- 补 `author` 字段（electron-builder 会警告缺失，且用于发布者信息）
+- README 补上打包所需的**两个**镜像变量 —— 此前只记了 `ELECTRON_MIRROR`，
+  但 electron-builder 还要下 NSIS、7zip 等，需要 `ELECTRON_BUILDER_BINARIES_MIRROR`
+
+**验证方式**：不只是"打包成功"，而是启动产物并用 CDP 查包内真实 DOM：
+
+```
+{"preview":true,"nav":8,"footer":"简历工坊 v1.2.0|填写进度 0/6已保存","hasExportBtn":true}
+```
+
+确认 preload 解析、asar 路径、渲染进程加载、版本号注入均正常。
+
 ### ↩️ 「支持我」栏暂缓（未上线）
 
 初版写的「支持我」栏已**移除**。原因：该栏文案是「本应用没有收费计划」，
