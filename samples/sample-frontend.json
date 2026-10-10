@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "templateId": "classic",
+    "updatedAt": "2026-10-10T00:00:00.000Z",
+    "version": 2,
+    "accentColor": "#1f4e79"
+  },
+  "personalInfo": {
+    "fullName": "示例·前端",
+    "email": "example@example.com",
+    "phone": "138-0000-0000",
+    "location": "北京",
+    "title": "前端开发工程师",
+    "website": "https://example.dev",
+    "github": "example-dev",
+    "linkedin": "",
+    "avatar": ""
+  },
+  "summary": "4 年前端开发经验，熟练运用 Vue 3 与 TypeScript，主导过中后台系统架构重构，首屏加载时间下降 42%。习惯用数据驱动性能优化，推动过 3 次跨团队协作并沉淀公共组件库。",
+  "education": [
+    {
+      "id": "edu-1",
+      "school": "示例大学",
+      "degree": "本科",
+      "major": "软件工程",
+      "startDate": "2017-09",
+      "endDate": "2021-06",
+      "gpa": "3.7/4.0",
+      "description": "主修数据结构、操作系统、计算机网络；连续两学年获校一等奖学金。"
+    }
+  ],
+  "workExperience": [
+    {
+      "id": "work-1",
+      "company": "示例科技（北京）",
+      "position": "前端开发工程师",
+      "startDate": "2023-07",
+      "endDate": "",
+      "isCurrent": true,
+      "location": "北京",
+      "description": "负责增长业务线前端架构设计与性能治理，对接 3 个上下游团队。",
+      "achievements": [
+        "主导活动页架构重构，首屏加载时间减少 1.8 秒，带宽消耗下降 40%",
+        "优化 Vite 构建配置，构建耗时缩短至 3 分钟，页面渲染速度提升 48%",
+        "推动前端错误监控与埋点方案落地，覆盖 65 个关键事件，问题定位时间缩短 41%"
+      ]
+    },
+    {
+      "id": "work-2",
+      "company": "示例网络（杭州）",
+      "position": "前端开发工程师",
+      "startDate": "2021-07",
+      "endDate": "2023-06",
+      "isCurrent": false,
+      "location": "杭州",
+      "description": "参与中台建设，沉淀通用能力供多条业务线复用。",
+      "achievements": [
+        "开发并维护公共组件库，沉淀 32 个组件，重复开发工时下降约 38%",
+        "独立完成 56 个页面开发与接口联调，上线后累计服务 24 家客户"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj-1",
+      "name": "示例数据看板",
+      "role": "前端负责人",
+      "startDate": "2023-10",
+      "endDate": "2024-03",
+      "description": "基于 Vue 3 + Vite + TypeScript 的可视化数据大屏，支持多端适配与动态数据刷新。",
+      "technologies": ["Vue 3", "TypeScript", "Vite", "ECharts"],
+      "link": "https://github.com/example/dashboard-demo",
+      "highlights": [
+        "首屏加载从 3.2 秒降到 1.1 秒",
+        "支撑 12 个业务团队的自助式看板配置"
+      ]
+    },
+    {
+      "id": "proj-2",
+      "name": "示例管理后台",
+      "role": "核心开发",
+      "startDate": "2022-03",
+      "endDate": "2022-11",
+      "description": "企业级中后台管理系统，Monorepo 架构，内置权限、主题切换与国际化。",
+      "technologies": ["Vue 3", "Element Plus", "Vite"],
+      "highlights": ["沉淀 32 个公共组件，重复开发工时下降约 38%"]
+    }
+  ],
+  "skills": [
+    { "id": "skill-1", "name": "TypeScript", "level": "advanced", "category": "编程语言" },
+    { "id": "skill-2", "name": "JavaScript", "level": "advanced", "category": "编程语言" },
+    { "id": "skill-3", "name": "Vue 3", "level": "expert", "category": "前端框架" },
+    { "id": "skill-4", "name": "React", "level": "intermediate", "category": "前端框架" },
+    { "id": "skill-5", "name": "Element Plus", "level": "advanced", "category": "前端框架" },
+    { "id": "skill-6", "name": "ECharts", "level": "advanced", "category": "数据可视化" },
+    { "id": "skill-7", "name": "Vite", "level": "advanced", "category": "工程化" },
+    { "id": "skill-8", "name": "Webpack", "level": "intermediate", "category": "工程化" },
+    { "id": "skill-9", "name": "Git", "level": "advanced", "category": "工程化" },
+    { "id": "skill-10", "name": "Node.js", "level": "intermediate", "category": "后端与数据库" },
+    { "id": "skill-11", "name": "MySQL", "level": "beginner", "category": "后端与数据库" },
+    { "id": "skill-12", "name": "微信小程序", "level": "intermediate", "category": "跨端开发" }
+  ]
+}

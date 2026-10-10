@@ -100,9 +100,17 @@ resume-app/
 
 | 文档 | 说明 |
 |------|------|
-| [开发参考](docs/development-reference.md) | 13章完整技术文档 |
+| [开发参考](docs/development-reference.md) | 14 章完整技术文档（含 PDF 管线与颜色约束） |
+| [内测报告](docs/beta-test-report.md) | v1.2.0 内测：9 项缺陷、修复与验证证据 |
+| [Apple 对比与优化建议](docs/design-benchmark-apple.md) | 对标 macOS 系统应用的差距分析与改进路线 |
 | [错误记录](docs/errors-and-fixes.md) | 开发错误与解决方案 |
 | [更新日志](docs/CHANGELOG.md) | 版本变更 + 优化建议 |
+
+## 🧪 示例数据
+
+`samples/sample-frontend.json` 是一份完整的示例简历，用于快速查看排版效果：
+
+**打开 → 选择 `samples/sample-frontend.json`** 即可载入（该文件为虚构内容，不含任何真实个人信息）。
 
 ## 📄 许可证
 

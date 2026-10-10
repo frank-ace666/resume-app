@@ -505,4 +505,10 @@ Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
 入口 (5)：index.html, src/main.tsx, src/App.tsx, src/index.css, src/global.d.ts
 
 资源 (1)：resources/icon.png（打包图标；由 SVG 形状程序化生成）
+
+示例 (1)：samples/sample-frontend.json（虚构的示例简历，用于查看排版效果）
+
+文档 (5)：docs/development-reference.md（本文件）、docs/beta-test-report.md、
+          docs/design-benchmark-apple.md、docs/errors-and-fixes.md,
+          docs/CHANGELOG.md
 ```
