@@ -8,9 +8,8 @@
     "strict": true,
     "skipLibCheck": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "outDir": "./out",
     "lib": ["ESNext", "DOM", "DOM.Iterable"]

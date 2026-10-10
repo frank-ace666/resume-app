@@ -1,41 +1,169 @@
+import { useCallback, useRef, useState } from 'react'
 import { useResumeStore } from '@/store/resumeStore'
+import { toast } from '@/store/toastStore'
+import { TextField } from '@/components/ui/TextField'
+import Button from '@/components/ui/Button'
+import {
+  IconCamera,
+  IconGithub,
+  IconGlobe,
+  IconLinkedin,
+  IconMail,
+  IconMapPin,
+  IconPhone,
+  IconTrash,
+  IconUser
+} from '@/components/ui/Icons'
+import { fileToSquareDataUrl } from '@/utils/image'
+
+const FIELDS = [
+  { key: 'fullName', label: '姓名', placeholder: '你的全名', icon: <IconUser size={16} /> },
+  { key: 'title', label: '求职意向', placeholder: '如：前端开发工程师', icon: null },
+  { key: 'email', label: '邮箱', placeholder: 'example@email.com', icon: <IconMail size={16} /> },
+  { key: 'phone', label: '电话', placeholder: '手机号码', icon: <IconPhone size={16} /> },
+  { key: 'location', label: '所在地', placeholder: '如：北京', icon: <IconMapPin size={16} /> },
+  { key: 'website', label: '个人网站', placeholder: 'https://（选填）', icon: <IconGlobe size={16} /> },
+  { key: 'github', label: 'GitHub', placeholder: 'GitHub 用户名（选填）', icon: <IconGithub size={16} /> },
+  { key: 'linkedin', label: 'LinkedIn', placeholder: 'LinkedIn 链接（选填）', icon: <IconLinkedin size={16} /> }
+] as const
+
+function AvatarUploader() {
+  const avatar = useResumeStore((s) => s.data.personalInfo.avatar)
+  const update = useResumeStore((s) => s.updatePersonalInfo)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+
+  const handleFile = useCallback(
+    async (file: File | undefined) => {
+      if (!file) return
+      setIsProcessing(true)
+      try {
+        const dataUrl = await fileToSquareDataUrl(file)
+        update({ avatar: dataUrl })
+        toast.success('头像已更新')
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : '头像处理失败')
+      } finally {
+        setIsProcessing(false)
+      }
+    },
+    [update]
+  )
+
+  return (
+    <div className="flex items-center gap-4">
+      {/* 预览 / 拖放区 */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault()
+          setIsDragging(true)
+        }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault()
+          setIsDragging(false)
+          void handleFile(e.dataTransfer.files?.[0])
+        }}
+        onClick={() => inputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click()
+        }}
+        title="点击或拖入图片设置头像"
+        className={`group relative flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full border-2 border-dashed transition-all duration-[var(--duration-base)] ease-[var(--ease-standard)]
+          ${isDragging ? 'scale-105 border-brand bg-brand-soft' : 'border-outline hover:border-brand hover:bg-brand-soft'}
+          ${avatar ? 'border-solid border-outline' : ''}`}
+      >
+        {avatar ? (
+          <>
+            <img src={avatar} alt="头像预览" className="h-full w-full object-cover" />
+            <span className="absolute inset-0 flex items-center justify-center bg-ink/55 text-white opacity-0 transition-opacity group-hover:opacity-100">
+              <IconCamera size={20} />
+            </span>
+          </>
+        ) : (
+          <span className="flex flex-col items-center gap-1 text-ink-3">
+            <IconCamera size={20} />
+            <span className="text-[10px]">上传头像</span>
+          </span>
+        )}
+      </div>
+
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-ink">头像</p>
+        <p className="mt-0.5 text-xs leading-relaxed text-ink-3">
+          {isProcessing ? '正在处理图片…' : '点击或拖入图片，会自动裁成正方形并压缩'}
+        </p>
+        <div className="mt-2 flex gap-2">
+          <Button
+            variant="outlined"
+            size="sm"
+            loading={isProcessing}
+            onClick={() => inputRef.current?.click()}
+          >
+            {avatar ? '更换' : '选择图片'}
+          </Button>
+          {avatar && (
+            <Button
+              variant="text"
+              size="sm"
+              icon={<IconTrash size={15} />}
+              onClick={() => {
+                update({ avatar: undefined })
+                toast.info('已移除头像')
+              }}
+            >
+              移除
+            </Button>
+          )}
+        </div>
+        <p className="mt-1.5 text-[11px] text-ink-3">
+          提示：国内互联网岗位通常不放照片，国企/银行岗位更常见
+        </p>
+      </div>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          void handleFile(e.target.files?.[0])
+          e.target.value = '' // 允许重复选择同一文件
+        }}
+      />
+    </div>
+  )
+}
 
 export default function PersonalInfoForm() {
   const info = useResumeStore((s) => s.data.personalInfo)
   const update = useResumeStore((s) => s.updatePersonalInfo)
 
-  const fields: { key: keyof typeof info; label: string; placeholder: string }[] = [
-    { key: 'fullName', label: '姓名', placeholder: '你的全名' },
-    { key: 'title', label: '求职意向', placeholder: '如：前端开发工程师' },
-    { key: 'email', label: '邮箱', placeholder: 'example@email.com' },
-    { key: 'phone', label: '电话', placeholder: '手机号码' },
-    { key: 'location', label: '所在地', placeholder: '如：北京' },
-    { key: 'website', label: '个人网站', placeholder: 'https://（选填）' },
-    { key: 'github', label: 'GitHub', placeholder: 'GitHub 用户名（选填）' },
-    { key: 'linkedin', label: 'LinkedIn', placeholder: 'LinkedIn 链接（选填）' }
-  ]
-
   return (
-    <div>
-      <h2 className="text-lg font-semibold text-slate-800 mb-4">个人信息</h2>
-      <p className="text-sm text-slate-500 mb-5">
-        填写你的基本信息，让 HR 一眼了解你。
-      </p>
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-base font-medium text-ink">个人信息</h2>
+        <p className="mt-1 text-sm text-ink-2">
+          填写基本信息与求职意向，让 HR 一眼了解你。
+        </p>
+      </div>
 
-      <div className="space-y-4">
-        {fields.map((f) => (
-          <div key={f.key}>
-            <label className="block text-sm font-medium text-slate-600 mb-1">
-              {f.label}
-            </label>
-            <input
-              type="text"
-              value={String(info[f.key] || '')}
-              onChange={(e) => update({ [f.key]: e.target.value })}
-              placeholder={f.placeholder}
-              className="w-full px-3 py-2 border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-            />
-          </div>
+      <AvatarUploader />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {FIELDS.map((f) => (
+          <TextField
+            key={f.key}
+            label={f.label}
+            placeholder={f.placeholder}
+            value={String(info[f.key] ?? '')}
+            onChange={(e) => update({ [f.key]: e.target.value })}
+            addon={f.icon}
+            className={f.key === 'fullName' || f.key === 'title' ? 'sm:col-span-2' : ''}
+          />
         ))}
       </div>
     </div>

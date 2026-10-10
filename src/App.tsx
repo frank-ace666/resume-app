@@ -1,12 +1,16 @@
-import { useCallback } from 'react'
-import Header from './components/layout/Header'
+import { useCallback, useState } from 'react'
+import AppBar from './components/layout/AppBar'
 import MainLayout from './components/layout/MainLayout'
 import StatusBar from './components/layout/StatusBar'
+import ConfirmDialog from './components/ui/ConfirmDialog'
+import ToastHost from './components/ui/ToastHost'
 import { useResumeStore } from './store/resumeStore'
 import { useUIStore } from './store/uiStore'
 import { useAutoSave } from './hooks/useAutoSave'
 import { usePdfExport } from './hooks/usePdfExport'
+import { useAccentTheme } from './hooks/useAccentTheme'
 import { saveToFile, loadFromFile } from './utils/fileIO'
+import { toast } from './store/toastStore'
 
 export default function App() {
   const resetData = useResumeStore((s) => s.resetData)
@@ -16,59 +20,83 @@ export default function App() {
   const isAutoSaved = useUIStore((s) => s.isAutoSaved)
   const lastSavedAt = useUIStore((s) => s.lastSavedAt)
 
-  // 自动保存
+  const [confirmNewOpen, setConfirmNewOpen] = useState(false)
+
+  // 自动保存（必须挂在顶层：移入面板会因 unmount 清理定时器而失效）
   useAutoSave()
 
+  // 简历强调色 → 应用外壳主题
+  useAccentTheme()
+
   // PDF 导出
-  const { isExporting, error: pdfError, handleExportPDF, clearError } = usePdfExport()
+  const { isExporting, handleExportPDF } = usePdfExport()
 
-  // 新建简历
-  const handleCreateNew = useCallback(() => {
-    if (data.personalInfo.fullName || data.summary) {
-      // 简单判断是否有内容
-      const confirmed = window.confirm('确定要新建简历吗？当前内容将被清除。')
-      if (!confirmed) return
-    }
+  const hasContent = Boolean(data.personalInfo.fullName || data.summary)
+
+  const doCreateNew = useCallback(() => {
     resetData()
-    clearError()
-  }, [data, resetData, clearError])
+    toast.info('已新建空白简历')
+  }, [resetData])
 
-  // 打开文件
+  const handleCreateNew = useCallback(() => {
+    if (hasContent) {
+      setConfirmNewOpen(true)
+      return
+    }
+    doCreateNew()
+  }, [hasContent, doCreateNew])
+
   const handleOpenFile = useCallback(async () => {
     const result = await loadFromFile()
     if (result.success && result.data) {
       loadData(result.data, result.filePath)
-    } else if (result.success === false && window.electronAPI) {
-      // 用户取消了操作
+      toast.success('简历已打开')
+    } else if (result.success === false && !window.electronAPI) {
+      toast.error('当前环境不支持打开本地文件')
     }
   }, [loadData])
 
-  // 保存文件
   const handleSaveFile = useCallback(async () => {
     const result = await saveToFile(data)
     if (result.success) {
       setFileName(result.filePath || '')
+
+    
+      
+      toast.success('简历已保存到文件')
+    } else {
+      toast.error('保存失败，请重试')
     }
   }, [data, setFileName])
 
   return (
     <>
-      <Header
+      <AppBar
         onCreateNew={handleCreateNew}
         onOpenFile={handleOpenFile}
         onSaveFile={handleSaveFile}
         onExportPDF={handleExportPDF}
         isExporting={isExporting}
-        pdfError={pdfError}
       />
-      <MainLayout
-        onExportPDF={handleExportPDF}
-        isExporting={isExporting}
+
+      <MainLayout onExportPDF={handleExportPDF} isExporting={isExporting} />
+
+      <StatusBar isAutoSaved={isAutoSaved} lastSavedAt={lastSavedAt} />
+
+      <ConfirmDialog
+        open={confirmNewOpen}
+        danger
+        title="新建简历？"
+        description="当前简历的内容将被清除，且此操作无法撤销。建议先保存到文件。"
+        confirmLabel="清除并新建"
+        onCancel={() => setConfirmNewOpen(false)}
+        onConfirm={() => {
+          setConfirmNewOpen(false)
+          doCreateNew()
+        }}
       />
-      <StatusBar
-        isAutoSaved={isAutoSaved}
-        lastSavedAt={lastSavedAt}
-      />
+
+      <ToastHost />
     </>
   )
 }

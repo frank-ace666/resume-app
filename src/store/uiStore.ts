@@ -1,5 +1,10 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
+/**
+ * 注意：FORM_STEPS 的 key 与顺序被 OptimizationForm 的「跳转到分区」依赖，
+ * 必须与 types/optimization.ts 的 SectionKey 保持一致。不要改动。
+ */
 export const FORM_STEPS = [
   { index: 0, label: '个人信息', key: 'personalInfo' },
   { index: 1, label: '教育经历', key: 'education' },
@@ -18,20 +23,59 @@ interface UIStore {
   isAutoSaved: boolean
   lastSavedAt: string | null
 
+  /** 左侧导航是否折叠为图标栏 */
+  navCollapsed: boolean
+  /** 编辑器占内容区的宽度百分比 */
+  editorWidthPct: number
+  /** 专注预览：折叠编辑器，预览占满 */
+  isFocusMode: boolean
+  /** 预览是否跟随容器宽度自适应 */
+  fitToWidth: boolean
+
   setCurrentStep: (step: number) => void
   setPreviewScale: (scale: number) => void
   setIsAutoSaved: (saved: boolean) => void
   setLastSavedAt: (time: string | null) => void
+  toggleNav: () => void
+  setEditorWidthPct: (pct: number) => void
+  toggleFocusMode: () => void
+  setFitToWidth: (fit: boolean) => void
 }
 
-export const useUIStore = create<UIStore>()((set) => ({
-  currentStep: 0,
-  previewScale: 100,
-  isAutoSaved: true,
-  lastSavedAt: null,
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
-  setCurrentStep: (step) => set({ currentStep: step }),
-  setPreviewScale: (scale) => set({ previewScale: Math.min(200, Math.max(25, scale)) }),
-  setIsAutoSaved: (saved) => set({ isAutoSaved: saved }),
-  setLastSavedAt: (time) => set({ lastSavedAt: time })
-}))
+export const useUIStore = create<UIStore>()(
+  persist(
+    (set) => ({
+      currentStep: 0,
+      previewScale: 100,
+      isAutoSaved: true,
+      lastSavedAt: null,
+      navCollapsed: false,
+      editorWidthPct: 52,
+      isFocusMode: false,
+      // 默认适应宽度：100% 缩放时 A4（794px）通常比预览区宽，
+      // 会让简历右侧被裁掉。先自适应，用户主动缩放时再切回固定比例。
+      fitToWidth: true,
+
+      setCurrentStep: (step) => set({ currentStep: step }),
+      setPreviewScale: (scale) => set({ previewScale: clamp(scale, 25, 200), fitToWidth: false }),
+      setIsAutoSaved: (saved) => set({ isAutoSaved: saved }),
+      setLastSavedAt: (time) => set({ lastSavedAt: time }),
+      toggleNav: () => set((s) => ({ navCollapsed: !s.navCollapsed })),
+      setEditorWidthPct: (pct) => set({ editorWidthPct: clamp(pct, 25, 75) }),
+      toggleFocusMode: () => set((s) => ({ isFocusMode: !s.isFocusMode })),
+      setFitToWidth: (fit) => set({ fitToWidth: fit })
+    }),
+    {
+      name: 'resume-craft-ui',
+      // 只持久化布局偏好，不持久化瞬时状态
+      partialize: (s) => ({
+        navCollapsed: s.navCollapsed,
+        editorWidthPct: s.editorWidthPct,
+        previewScale: s.previewScale,
+        fitToWidth: s.fitToWidth
+      })
+    }
+  )
+)

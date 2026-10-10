@@ -1,110 +1,88 @@
 import { useResumeStore } from '@/store/resumeStore'
+import { TextField, TextArea } from '@/components/ui/TextField'
+import EmptyState from '@/components/ui/EmptyState'
+import { FormHeader, EntryCard } from '../FormScaffold'
+import { IconGraduationCap } from '@/components/ui/Icons'
 
 export default function EducationForm() {
-  const education = useResumeStore((s) => s.data.education)
+  const list = useResumeStore((s) => s.data.education)
   const add = useResumeStore((s) => s.addEducation)
   const update = useResumeStore((s) => s.updateEducation)
   const remove = useResumeStore((s) => s.removeEducation)
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-lg font-semibold text-slate-800">教育经历</h2>
-          <p className="text-sm text-slate-500 mt-1">添加你的学历背景。</p>
-        </div>
-        <button
-          onClick={add}
-          className="px-3 py-1.5 text-sm font-medium text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50 transition-colors"
-        >
-          + 添加
-        </button>
-      </div>
+    <div className="space-y-5">
+      <FormHeader
+        title="教育经历"
+        description="按时间倒序填写，最近的学历放在最前面。"
+        actionLabel="添加"
+        onAction={add}
+      />
 
-      {education.length === 0 && (
-        <p className="text-sm text-slate-400 text-center py-8">暂无教育经历，点击"添加"开始</p>
-      )}
-
-      <div className="space-y-5">
-        {education.map((edu, i) => (
-          <div key={edu.id} className="border border-slate-200 rounded-lg p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium text-slate-600">教育经历 {i + 1}</span>
-              <button
-                onClick={() => remove(edu.id)}
-                className="text-xs text-red-500 hover:text-red-700 transition-colors"
-              >
-                删除
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">学校</label>
-                <input
-                  type="text"
+      {list.length === 0 ? (
+        <EmptyState
+          icon={<IconGraduationCap size={26} />}
+          title="还没有教育经历"
+          description="填上学校、专业与在读时间，这是应届生简历里最重要的一段。"
+          actionLabel="添加教育经历"
+          onAction={add}
+        />
+      ) : (
+        <div className="space-y-4">
+          {list.map((edu, i) => (
+            <EntryCard key={edu.id} index={i} label="教育经历" onRemove={() => remove(edu.id)}>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <TextField
+                  label="学校"
+                  placeholder="学校名称"
                   value={edu.school}
                   onChange={(e) => update(edu.id, { school: e.target.value })}
-                  placeholder="学校名称"
-                  className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="sm:col-span-2"
                 />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">学位</label>
-                <select
+                <TextField
+                  label="学历"
+                  placeholder="如：本科 / 硕士"
                   value={edu.degree}
                   onChange={(e) => update(edu.id, { degree: e.target.value })}
-                  className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                >
-                  <option value="">请选择</option>
-                  <option value="大专">大专</option>
-                  <option value="学士">学士</option>
-                  <option value="硕士">硕士</option>
-                  <option value="博士">博士</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">专业</label>
-                <input
-                  type="text"
+                />
+                <TextField
+                  label="专业"
+                  placeholder="专业名称"
                   value={edu.major}
                   onChange={(e) => update(edu.id, { major: e.target.value })}
-                  placeholder="专业名称"
-                  className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">GPA（选填）</label>
-                <input
-                  type="text"
-                  value={edu.gpa || ''}
-                  onChange={(e) => update(edu.id, { gpa: e.target.value })}
-                  placeholder="如 3.8/4.0"
-                  className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">开始时间</label>
-                <input
+                <TextField
+                  label="入学时间"
                   type="month"
                   value={edu.startDate}
                   onChange={(e) => update(edu.id, { startDate: e.target.value })}
-                  className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-              </div>
-              <div>
-                <label className="block text-xs text-slate-500 mb-1">结束时间</label>
-                <input
+                <TextField
+                  label="毕业时间"
                   type="month"
                   value={edu.endDate}
                   onChange={(e) => update(edu.id, { endDate: e.target.value })}
-                  className="w-full px-2 py-1.5 border border-slate-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <TextField
+                  label="GPA / 成绩"
+                  placeholder="如：3.8/4.0（选填）"
+                  value={edu.gpa ?? ''}
+                  onChange={(e) => update(edu.id, { gpa: e.target.value })}
                 />
               </div>
-            </div>
-          </div>
-        ))}
-      </div>
+
+              <TextArea
+                label="在校经历 / 主修课程（选填）"
+                placeholder="如：主修课程：数据结构、操作系统；获一等奖学金"
+                value={edu.description ?? ''}
+                onChange={(e) => update(edu.id, { description: e.target.value })}
+                rows={2}
+                className="mt-4"
+              />
+            </EntryCard>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

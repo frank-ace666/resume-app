@@ -22,12 +22,20 @@
 
 | 功能 | 说明 |
 |------|------|
-| 📝 **3 个简历模板** | 经典（双栏）、现代（卡片+时间线）、简约（单栏留白） |
-| ✏️ **6 步表单** | 个人信息、教育经历、工作经历、技能特长、项目经历、自我评价 |
-| 👁️ **实时预览** | 右侧 A4 预览，支持 25%-200% 缩放 |
-| 📤 **导出 PDF** | 所见即所得，中文支持 |
-| 💾 **本地保存** | JSON 文件保存/打开 + 自动保存 |
+| 📝 **3 个简历模板** | 经典（双栏）、现代（色块+竖条）、简约（单栏留白，最 ATS 友好） |
+| 🎨 **主题色** | 8 个专业预设 + 自定义，同时应用到界面与简历标题 |
+| ✏️ **7 步表单** | 个人信息（含头像）、教育、工作、技能、项目、自我评价、简历检查 |
+| 👁️ **实时预览** | A4 预览，25%–200% 缩放、适应宽度、Ctrl+滚轮、**分页参考线** |
+| 🖥️ **可调布局** | 拖拽分隔条调整编辑/预览比例，支持「专注预览」折叠编辑区 |
+| 📤 **导出 PDF** | 所见即所得，中文支持，**超过一页自动分页**（不再截断） |
+| 💾 **本地保存** | JSON 文件保存/打开 + 自动保存，旧存档自动补齐新字段 |
 | 🔍 **简历检查** | 27 条规则引擎：完整性、格式、表达质量、一致性 |
+
+> 界面为 Material 风格（Gmail / YouTube 系）：左侧分区导航带完成度与问题徽标、
+> 顶部应用栏、涟漪与过渡动效、snackbar 提示，并遵循系统「减少动态效果」设置。
+>
+> 简历模板本身**刻意不使用**这套界面语言 —— 它是要打印和过机器筛选的文档，
+> 只用单一强调色、纯文字熟练度、无 emoji 图标，以保证 ATS 解析与灰度打印都不出问题。
 
 ## 🚀 快速开始
 
@@ -60,27 +68,33 @@ npm run package
 | UI | React 19 + Tailwind CSS 4 |
 | 语言 | TypeScript |
 | 状态管理 | Zustand 5 |
-| PDF 导出 | html2pdf-browser |
+| PDF 导出 | html2pdf-browser（`html2canvas`）+ jsPDF，自行做 A4 定位与分页 |
 | 打包 | electron-builder |
 
 ## 📁 项目结构
 
 ```
 resume-app/
-├── electron/          # Electron 主进程 + preload
+├── electron/            # Electron 主进程 + preload
+├── resources/           # 打包图标
 ├── src/
-│   ├── components/    # React 组件
-│   │   ├── layout/    # Header / MainLayout / StatusBar
-│   │   ├── editor/    # 编辑器面板 + 7步表单
-│   │   ├── preview/   # 预览面板 + 缩放控制
-│   │   └── templates/ # 3个简历模板
-│   ├── store/         # Zustand 状态管理
-│   ├── types/         # TypeScript 类型定义
-│   ├── utils/         # 工具函数（规则引擎等）
-│   └── hooks/         # 自定义 Hook
-├── docs/              # 开发文档
+│   ├── components/
+│   │   ├── ui/          # 原子组件（Button / Card / TextField / Icons / Toast …）
+│   │   ├── layout/      # AppBar / NavDrawer / MainLayout / StatusBar
+│   │   ├── editor/      # 编辑器面板 + 外观设置 + 7 步表单
+│   │   ├── preview/     # 预览面板 + 缩放工具栏 + 渲染容器
+│   │   └── templates/   # 3 个简历模板 + shared（排版尺度与打印色板）
+│   ├── store/           # Zustand 状态管理
+│   ├── types/           # TypeScript 类型定义
+│   ├── utils/           # 工具函数（规则引擎、A4 分页、配色、图像）
+│   └── hooks/           # 自定义 Hook
+├── docs/                # 开发文档
 └── package.json
 ```
+
+> 改模板前请先读 [开发参考 · 第九节](docs/development-reference.md)：
+> 模板内颜色不能用 Tailwind 调色板类（oklch）与透明度修饰符（color-mix），
+> 否则 PDF 导出会直接失败。
 
 ## 📚 文档
 

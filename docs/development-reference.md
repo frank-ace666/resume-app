@@ -56,12 +56,12 @@
 | 类型系统 | TypeScript               | 类型安全                                |
 | 状态管理 | Zustand 5                | 轻量全局状态 + 内置 persist             |
 | 样式方案 | Tailwind CSS 4           | 原子化 CSS                              |
-| PDF 导出 | html2pdf-browser         | html2canvas 截图 → jsPDF               |
+| PDF 导出 | html2pdf-browser + jsPDF | 该库的 html2canvas（带中文修复）光栅化 → jsPDF 按 A4 分页 |
 
 ### 为什么选择这些技术？
 
 - **Zustand 而非 Redux**：简历应用状态结构简单，Zustand 无 Provider、API 简洁、内置 persist，30 分钟就能上手。Redux 对这个小应用来说太重。
-- **html2pdf-browser 而非 @react-pdf/renderer**：html2pdf 截取已渲染的 HTML → 图片 → PDF，所见即所得。@react-pdf/renderer 需要用其 DSL 重写模板，相当于做两遍 UI，第一版不划算。
+- **html2pdf-browser 而非 @react-pdf/renderer**：html2pdf 截取已渲染的 HTML → 图片 → PDF，所见即所得。@react-pdf/renderer 需要用其 DSL 重写模板，相当于做两遍 UI，第一版不划算。注意只使用它导出的 `html2canvas`（相比上游修了中文文字重叠与 SVG `<use href>`），**不要用它的 `html2pdf()` 一步到位** —— 原因见第十三节。`jspdf` 因此被显式声明为直接依赖（此前只是传递依赖）。
 - **Tailwind CSS 而非 CSS Modules**：模板组件需要大量细粒度样式控制（A4 排版），Tailwind 原子类比手写 CSS 更高效。
 
 ---
@@ -153,23 +153,38 @@ resume-app/
 │   │
 │   ├── store/                        # Zustand 全局状态
 │   │   ├── resumeStore.ts            # 简历数据 + 增删改 + 文件操作
-│   │   └── uiStore.ts               # 步骤索引、缩放比例、保存状态
+│   │   ├── uiStore.ts                # 步骤索引、缩放、布局偏好（持久化）
+│   │   └── toastStore.ts             # 轻提示队列
 │   │
 │   ├── components/
-│   │   ├── layout/                   # 框架层：Header / MainLayout / StatusBar
-│   │   ├── editor/                   # 编辑器：面板 + 模板选择 + 步骤导航
-│   │   │   └── forms/               # 6 个步骤表单（每个独立文件）
+│   │   ├── ui/                       # 原子组件（Material 风格，全站复用）
+│   │   │   ├── Button.tsx            # 5 种变体 + 涟漪 + loading
+│   │   │   ├── Card.tsx              # 表面容器
+│   │   │   ├── TextField.tsx         # 浮动标签输入框 / 多行框
+│   │   │   ├── Icons.tsx             # 内联 SVG 图标集（取代 emoji）
+│   │   │   ├── ToastHost.tsx         # Gmail 式底部 snackbar
+│   │   │   ├── ConfirmDialog.tsx     # 取代 window.confirm
+│   │   │   └── EmptyState.tsx        # 空状态 + 主 CTA
+│   │   ├── layout/                   # 框架层：AppBar / NavDrawer / MainLayout / StatusBar
+│   │   ├── editor/                   # 编辑器：面板 + 模板选择 + 主题色 + 表单脚手架
+│   │   │   └── forms/               # 7 个步骤表单（每个独立文件）
 │   │   ├── preview/                  # 预览器：面板 + 缩放工具栏 + 渲染容器
-│   │   └── templates/               # 3 个简历模板（纯展示组件，只接收 data）
+│   │   └── templates/               # 3 个简历模板 + shared.tsx（排版尺度与打印色板）
 │   │
 │   ├── hooks/                        # 自定义 Hook
 │   │   ├── useAutoSave.ts            # 自动保存逻辑（防抖 → localStorage）
+│   │   ├── useAccentTheme.ts         # 主题色 → 应用 --color-brand 令牌
+│   │   ├── useResizable.ts           # 编辑区/预览区拖拽分栏
 │   │   └── usePdfExport.ts           # PDF 导出逻辑（状态管理 + 回调）
 │   │
 │   ├── utils/                        # 工具函数
 │   │   ├── fileIO.ts                 # 文件保存/打开（IPC 层封装）
-│   │   ├── pdfExport.ts              # html2pdf-browser 封装
-│   │   └── templateRegistry.ts       # 模板注册表（id → 组件映射）
+│   │   ├── pdfExport.ts              # 光栅化 + A4 分页（见第十三节）
+│   │   ├── templateRegistry.ts       # 模板注册表（id → 组件映射）
+│   │   ├── sectionProgress.ts        # 各分区完成度（导航对勾与进度条）
+│   │   ├── color.ts                  # 对比度压暗、品牌色阶推导
+│   │   ├── accents.ts                # 主题色预设
+│   │   └── image.ts                  # 头像：读入 → 居中裁方 → 压缩
 │   │
 │   ├── App.tsx                       # 根组件：编排所有顶层逻辑
 │   ├── main.tsx                      # React 入口：挂载到 DOM
@@ -184,6 +199,19 @@ resume-app/
 ├── tsconfig.web.json                 # 渲染进程 TS 配置
 └── package.json                      # 依赖 + scripts + electron-builder 配置
 ```
+
+### `@/*` 路径别名：定义在两处，必须同步
+
+| 位置 | 配置 | 作用范围 |
+| ---- | ---- | -------- |
+| `tsconfig.web.json` | `"paths": { "@/*": ["./src/*"] }` | 类型检查 |
+| `electron.vite.config.ts` | `resolve.alias: { '@': resolve(__dirname, 'src') }` | 实际打包 |
+
+两处缺一不可：只有 tsconfig 会类型通过但打包失败，只有 vite 别名会打包成功但编辑器报红。
+
+**关于 `baseUrl`（不要加回来）**：旧配置写的是 `"baseUrl": "."` + `"paths": { "@/*": ["src/*"] }`。`baseUrl` 已在 TypeScript 6.0 标记弃用（TS5101），并将在 7.0 中彻底移除。现在 `paths` 直接相对 tsconfig 文件解析，因此不带 `baseUrl` 也能工作 —— 这是官方推荐的迁移写法，路径条目需自带 `./` 前缀。
+
+> `electron/` 目录（主进程 / preload）走 `tsconfig.node.json`，**没有** `@` 别名，那里的相对导入不能改成 `@/`。
 
 ---
 
@@ -202,9 +230,12 @@ resume-app/
      component: MyNewTemplate
    }
    ```
-4. 在 `TemplateSelector.tsx` 的 TEMPLATES 数组中添加选项
+4. 在 `TemplateSelector.tsx` 的 `TEMPLATE_ORDER` 数组中加入模板 id
 
 模板即组件，数据即 props，开闭原则——新增模板不改已有代码。
+
+> ⚠️ 模板内颜色必须遵守第九节的约束（不能用 Tailwind 调色板类与透明度修饰符），
+> 否则会让 PDF 导出直接失败。请从 `shared.tsx` 的 `PRINT` 取色。
 
 ---
 
@@ -245,11 +276,25 @@ resume-app/
 
 ### 模板样式策略
 
-- 模板组件用 Tailwind 原子类 + 少量内联样式（A4 尺寸用 `mm` 单位）
+### ⚠️ 模板内颜色的硬性约束（违反会导致 PDF 导出直接失败）
+
+简历模板的颜色**只能**取自 `src/components/templates/shared.tsx` 的 `PRINT` 色板，并以 inline style 施加。原因：
+
+1. **不能用 Tailwind 调色板类**（`text-slate-700`、`border-slate-200` …）。Tailwind v4 的默认调色板全部编译成 `oklch()`，而 html2canvas 1.4 不认识 oklch，解析颜色时会抛错。实测修复前捕获子树中有 448 处 oklch。
+2. **不能用透明度修饰符**（`text-white/90`、`bg-black/5`）。它们编译成 `color-mix(in oklab, …)`，同样不被支持。需要半透明请写 `rgba()`。
+3. 颜色走 inline style 而非 Tailwind 任意值类（`text-[#222222]`），是为了让色板集中在 `PRINT` 里维护 —— Tailwind 的扫描器读不到由常量拼出来的类名。
+
+字体/字号/行高这类非颜色样式仍可正常使用 Tailwind 类（`TYPE` 常量即是）。
+
+### 模板样式策略
+
+- 排版尺度统一由 `shared.tsx` 的 `TYPE` 提供：姓名 22px/700、分区标题 13px/700、正文 13px/1.55、日期 11.5px
+- 强调色由 `meta.accentColor` 驱动，经 `ensureContrastOnWhite()` 压暗到白底 4.5:1 后使用；全篇只出现在分区标题与分隔线上
 - 3 个模板的视觉差异：
-  - **经典**：`flex` 两栏，左侧灰底放个人信息+技能，右侧白底放经历
-  - **现代**：顶部渐变色卡片 + 蓝色左边框分割线 + 时间线圆点
-  - **简约**：单栏全白，大量留白，用 `tracking-[0.2em]` 上标小标题
+  - **经典**：`flex` 两栏，左侧灰底放姓名+联系方式+技能，右侧白底放经历（侧栏始终渲染）
+  - **现代**：顶部实心强调色块 + 强调色竖条标题
+  - **简约**：纯单栏全白，大量留白，`tracking-[0.18em]` 小标题，最 ATS 友好
+- 条目加 `break-inside-avoid`，避免分页把一段经历切断
 
 ---
 
@@ -272,23 +317,27 @@ npm run package   # 构建 + 打包为 Windows .exe 安装包（NSIS）
 
 ## 十一、已知限制 & 后续改进方向
 
-### 第一版限制
+### 当前限制
 
 | 限制             | 原因                               | 影响                   |
 | ---------------- | ---------------------------------- | ---------------------- |
 | PDF 文字不可选中 | html2canvas 截图方案，文字变为图片 | 部分 HR 习惯复制文字   |
-| 无头像裁剪功能   | 第一版简化                         | 上传非正方形图片会变形 |
+| 分页按高度硬切   | 不检测元素边界                     | 极端情况下可能切断一行文字 |
 | 无撤销/重做      | Zustand 未集成 temporal 中间件     | 误操作后需手动恢复     |
-| 单页简历         | A4 单页限制                        | 超过一页的内容会被截断 |
 | 无云端同步       | 纯本地                             | 换电脑需手动迁移 JSON  |
+| 无暗色模式       | 本期未做                           | token 体系已预留位置   |
+
+> 头像已支持上传（自动居中裁方 + 压到 256px），不再需要引入 cropper.js。
+> 多页简历已支持，不再截断 —— 见下一节。
 
 ### 后续可优化方向
 
-1. **PDF 文字可选**：使用 pdfmake 替代 html2pdf，注册中文字体
-2. **头像裁剪**：集成 cropper.js，上传后裁剪为正方形
+1. **PDF 文字可选**：使用 pdfmake 替代光栅化方案，注册中文字体
+2. **智能分页**：按元素边界切页，避免行内截断
 3. **撤销/重做**：Zustand + zundo 中间件，记录操作历史
-4. **多页支持**：模板组件中检测内容高度，自动分页
-5. **更多模板**：社区模板市场
+4. **字体/间距调节**：与主题色并列的外观三件套
+5. **暗色模式**：复用 `@theme` 令牌加 `.dark` 作用域
+6. **更多模板**：社区模板市场
 ## 十二、简历优化检查模块
 
 ### 设计原则
@@ -362,12 +411,62 @@ OptimizationForm   ──── 评分环 + 统计 + 问题列表 + 跳转
 
 ---
 
-## 十三、文件清单
+## 十三、PDF 导出管线
+
+### 为什么不用 `html2pdf-browser` 的 `html2pdf()`
+
+该库内部这样放图（`dist/index.es.js`）：
+
+```js
+b = el.offsetWidth; w = el.offsetHeight
+pdf.addImage(dataURL, 'JPEG', 0, 0, b, w)   // 尺寸单位跟随 jsPDF 的 unit
+```
+
+- 210mm 宽的元素在 CSS 里是 **793.7px**
+- 而 jsPDF 没有任何一种 unit 等于 1 CSS px（实测 A4 宽度：`pt`=595.28 / `mm`=210 / `px`=446.46）
+
+所以**无论 `unit` 传什么，图片都会比 A4 宽**。原实现传 `unit: 'mm'`，图片被按 794mm 绘制到 210mm 的页面上，实测溢出 **3.78 倍**，导出结果只剩简历左上角 26%，有效精度约 51dpi；长简历还会被整页压进一页后截断。
+
+### 现在的做法
+
+保留该库真正有价值的部分 —— 它导出的 `html2canvas` 带中文文字重叠与 SVG `<use href>` 渲染修复 —— 页面尺寸与分页自己控制：
+
+```
+html2canvas(el, { scale: 2 })        # 2 ≈ 192dpi
+      │
+      ├─ pxPerMm = canvas.width / (el.offsetWidth / (96/25.4))
+      ├─ pageHeightPx = 297 * pxPerMm
+      ├─ pageCount = ceil((canvas.height - 1) / pageHeightPx)   # 减 1px 容差防空白页
+      │
+      └─ 逐页：切 canvas 竖条 → toDataURL('image/jpeg', .95)
+               → pdf.addImage(img, 'JPEG', 0, 0, 210, sliceHeight / pxPerMm)
+```
+
+要点：
+
+- **`pxPerMm` 由元素布局宽度反推**，不依赖缩放倍率，因此导出结果与预览区当前缩放级别无关
+- 被捕获节点 `#resume-preview-content` 上**不能有 `transform`**；缩放放在它的父层。否则 html2canvas 的光栅化尺寸会随预览缩放漂移
+- 捕获前给元素加 `.pdf-capture-stabilize` 冻结动画与过渡，避免栅格化结果不确定
+- 底层仍用该库的 `html2canvas`，因此模板内的颜色必须遵守第九节的约束
+
+### 实测结果（12 段工作经历 + 8 个项目）
+
+| 页 | 绘制尺寸 (pt) | 占页面 |
+| -- | ------------- | ------ |
+| 1  | 595.3 × 841.9 | 100% × 100% |
+| 2  | 595.3 × 841.9 | 100% × 100% |
+| 3  | 595.3 × 135.8 | 100% × 16.1% |
+
+页面尺寸均为 A4（595.28 × 841.89pt），宽度始终 100%，最后一页按剩余高度绘制且不变形。
+
+---
+
+## 十四、文件清单
 
 ```
 共 39 个源文件（不含 node_modules / out / dist）
 
-配置文件 (4)：package.json, electron.vite.config.ts, tsconfig.json,
+配置文件 (5)：package.json, electron.vite.config.ts, tsconfig.json,
               tsconfig.node.json, tsconfig.web.json
 
 Electron (2)：electron/main/index.ts, electron/preload/index.ts
@@ -375,14 +474,17 @@ Electron (2)：electron/main/index.ts, electron/preload/index.ts
 类型定义 (3)：src/types/resume.ts, src/types/template.ts,
               src/types/optimization.ts
 
-状态管理 (3)：src/store/resumeStore.ts, src/store/uiStore.ts,
-              src/store/optimizationStore.ts
+状态管理 (4)：src/store/resumeStore.ts, src/store/uiStore.ts,
+              src/store/optimizationStore.ts, src/store/toastStore.ts
 
-布局组件 (4)：components/layout/Header.tsx, MainLayout.tsx, StatusBar.tsx,
-              ErrorBoundary.tsx
+原子组件 (7)：components/ui/Button.tsx, Card.tsx, TextField.tsx, Icons.tsx,
+              ToastHost.tsx, ConfirmDialog.tsx, EmptyState.tsx
 
-编辑器 (10)：components/editor/EditorPanel.tsx, TemplateSelector.tsx,
-             FormNavigation.tsx
+布局组件 (4)：components/layout/AppBar.tsx, NavDrawer.tsx, MainLayout.tsx,
+              StatusBar.tsx（ErrorBoundary 在 components/ 根下）
+
+编辑器 (11)：components/editor/EditorPanel.tsx, TemplateSelector.tsx,
+             AccentPicker.tsx, FormScaffold.tsx
              forms/PersonalInfoForm.tsx, EducationForm.tsx,
              WorkExperienceForm.tsx, SkillsForm.tsx, ProjectsForm.tsx,
              SummaryForm.tsx, OptimizationForm.tsx
@@ -390,13 +492,17 @@ Electron (2)：electron/main/index.ts, electron/preload/index.ts
 预览器 (3)：components/preview/PreviewPanel.tsx, PreviewToolbar.tsx,
             ResumePreview.tsx
 
-模板 (3)：components/templates/ClassicTemplate.tsx, ModernTemplate.tsx,
-          MinimalTemplate.tsx
+模板 (4)：components/templates/ClassicTemplate.tsx, ModernTemplate.tsx,
+          MinimalTemplate.tsx, shared.tsx
 
-Hooks (2)：hooks/useAutoSave.ts, hooks/usePdfExport.ts
+Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
+           hooks/useResizable.ts, hooks/usePdfExport.ts
 
-工具 (4)：utils/fileIO.ts, utils/pdfExport.ts, utils/templateRegistry.ts,
-          utils/resumeChecker.ts
+工具 (8)：utils/fileIO.ts, utils/pdfExport.ts, utils/templateRegistry.ts,
+          utils/resumeChecker.ts, utils/sectionProgress.ts, utils/color.ts,
+          utils/accents.ts, utils/image.ts
 
-入口 (4)：index.html, src/main.tsx, src/App.tsx, src/index.css, src/global.d.ts
+入口 (5)：index.html, src/main.tsx, src/App.tsx, src/index.css, src/global.d.ts
+
+资源 (1)：resources/icon.png（打包图标；由 SVG 形状程序化生成）
 ```

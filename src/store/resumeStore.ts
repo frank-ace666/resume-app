@@ -8,7 +8,7 @@ import type {
   Skill,
   Project
 } from '@/types/resume'
-import { createEmptyResume } from '@/types/resume'
+import { createEmptyResume, normalizeResumeData } from '@/types/resume'
 
 interface ResumeStore {
   // 数据
@@ -44,6 +44,9 @@ interface ResumeStore {
 
   // 模板
   setTemplate: (templateId: string) => void
+
+  // 强调色
+  setAccentColor: (color: string) => void
 
   // 文件操作
   loadData: (data: ResumeData, fileName?: string) => void
@@ -267,10 +270,21 @@ export const useResumeStore = create<ResumeStore>()(
           isDirty: true
         })),
 
+      // ===== 强调色 =====
+      setAccentColor: (accentColor) =>
+        set((s) => ({
+          data: {
+            ...s.data,
+            meta: { ...s.data.meta, accentColor, updatedAt: new Date().toISOString() }
+          },
+          isDirty: true
+        })),
+
       // ===== 文件操作 =====
       loadData: (data, fileName) =>
         set({
-          data,
+          // 旧版本存档或手改过的 JSON 可能缺字段，统一补齐后再入库
+          data: normalizeResumeData(data),
           fileName: fileName || '',
           isDirty: false
         }),
@@ -290,7 +304,16 @@ export const useResumeStore = create<ResumeStore>()(
       partialize: (state) => ({
         data: state.data,
         fileName: state.fileName
-      })
+      }),
+      // localStorage 里的旧结构同样是「缺字段」来源，合并时一并补齐
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<ResumeStore>
+        return {
+          ...current,
+          ...p,
+          data: normalizeResumeData(p.data)
+        }
+      }
     }
   )
 )
