@@ -567,9 +567,10 @@ Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
 
 入口 (5)：index.html, src/main.tsx, src/App.tsx, src/index.css, src/global.d.ts
 
-资源 (3)：resources/icon.ico（**打包实际使用**，7 档尺寸的多分辨率图标）、
-          resources/icon-2.png（1024×1024 设计稿，当前主图标）、
-          resources/icon-1.png（备用图标）
+资源 (3)：resources/icon.ico（**打包实际使用**，7 档尺寸的多分辨率图标，
+                            由 icon-1.png 生成）、
+          resources/icon-1.png（**当前主图标**，256×256 扁平字形）、
+          resources/icon-2.png（手绘插画版，设计稿保留）
 
 ### 换图标怎么做
 
@@ -578,15 +579,25 @@ Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
 小尺寸会明显发虚。所以先由设计稿生成一份多分辨率 ico：
 
 1. 把新的设计稿放进 `resources/`
-2. 用浏览器 canvas 或任意工具导出 16/24/32/48/64/128/256 七档 PNG
+2. 导出 16/24/32/48/64/128/256 七档 PNG（浏览器 canvas 即可，需高质量降采样）
 3. 打包成 ico（PNG 压缩的 ico 在 Windows Vista 之后均受支持）
 4. 替换 `resources/icon.ico` 后重新 `npm run package`
 
-> ⚠️ **插画风图标在小尺寸会糊。** 当前图标满幅带边框，中间的"纸"只占画布约 55%，
-> 缩到 16px 时纸仅约 9px 宽，还要画人像与六行文字，物理上无法辨认。
-> 实测 48px 起才清晰，32px 勉强可辨，16px 基本是一团色块。
-> 这是 Windows 与 macOS 的差异：Windows 大量使用 16/32px（任务栏、文件列表），
-> macOS Dock 最少 64pt。要改善只能出一版**去掉外框、内容放大**的小尺寸专用图。
+### ⚠️ 选图标时请先看小尺寸
+
+**Windows 任务栏和文件列表大量使用 16/32px**，而 macOS Dock 最少 64pt ——
+同一张图在两个平台的观感差异极大。本项目实际踩过这个坑：
+
+| 图标 | 16px | 32px | 48px | ico 体积 |
+| ---- | ---- | ---- | ---- | -------- |
+| `icon-1`（扁平字形） | 能看出是文档 | 清晰 | 清晰 | 11.7 KB |
+| `icon-2`（手绘插画，满幅带框） | **一团色块** | 勉强可辨 | 清晰 | 170 KB |
+
+`icon-2` 的问题是内容只占画布约 55%（外圈绿框 + 米色留白），
+缩到 16px 时中间的"纸"仅约 9px，还要画人像与六行文字，物理上无法辨认。
+
+**结论：设计稿先缩到 16/32px 看一眼再定稿。** 插画风若要用于 Windows，
+需另出一版去掉外框、内容放大的小尺寸专用图。
 
 示例 (1)：samples/sample-frontend.json（虚构的示例简历，用于查看排版效果）
 
