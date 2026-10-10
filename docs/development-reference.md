@@ -247,6 +247,7 @@ resume-app/
 | `open-file`         | Renderer → Main | 弹出打开对话框，读取 JSON 文件内容 |
 | `export-pdf-dialog` | Renderer → Main | 弹出保存对话框，返回 PDF 文件路径  |
 | `write-pdf`         | Renderer → Main | 将 PDF Blob 写入指定路径           |
+| `open-external`     | Renderer → Main | 用系统默认程序打开外链（协议白名单） |
 
 **安全原则**：
 
@@ -531,9 +532,11 @@ Electron (2)：electron/main/index.ts, electron/preload/index.ts
 Hooks (4)：hooks/useAutoSave.ts, hooks/useAccentTheme.ts,
            hooks/useResizable.ts, hooks/usePdfExport.ts
 
-工具 (9)：utils/fileIO.ts, utils/pdfExport.ts, utils/templateRegistry.ts,
-          utils/resumeChecker.ts, utils/validators.ts, utils/sectionProgress.ts,
-          utils/color.ts, utils/accents.ts, utils/image.ts
+工具 (10)：utils/fileIO.ts, utils/pdfExport.ts, utils/templateRegistry.ts,
+           utils/resumeChecker.ts, utils/validators.ts, utils/sectionProgress.ts,
+           utils/color.ts, utils/accents.ts, utils/image.ts, utils/mailto.ts
+
+数据 (1)：src/data/faq.ts（常见问题内容，依据见文件头注释）
 
 入口 (5)：index.html, src/main.tsx, src/App.tsx, src/index.css, src/global.d.ts
 

@@ -217,6 +217,22 @@
     transition: width var(--duration-base) var(--ease-standard),
       height var(--duration-base) var(--ease-standard);
   }
+
+  /* 折叠面板：用 grid-template-rows 0fr↔1fr 做高度动画，
+     无需测量内容高度，也不会在展开时出现跳变 */
+  .accordion-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-base) var(--ease-standard);
+  }
+
+  .accordion-panel[data-open='true'] {
+    grid-template-rows: 1fr;
+  }
+
+  .accordion-panel > div {
+    overflow: hidden;
+  }
 }
 
 /* ============================================================

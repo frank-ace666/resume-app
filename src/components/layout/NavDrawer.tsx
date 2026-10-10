@@ -10,6 +10,7 @@ import {
   IconClipboardCheck,
   IconFolder,
   IconGraduationCap,
+  IconHelp,
   IconUser,
   IconWrench
 } from '@/components/ui/Icons'
@@ -21,7 +22,8 @@ const SECTION_ICON: Record<string, ReactNode> = {
   skills: <IconWrench size={20} />,
   projects: <IconFolder size={20} />,
   summary: <IconChat size={20} />,
-  optimization: <IconClipboardCheck size={20} />
+  optimization: <IconClipboardCheck size={20} />,
+  support: <IconHelp size={20} />
 }
 
 export default function NavDrawer() {

@@ -8,7 +8,11 @@ import SkillsForm from './forms/SkillsForm'
 import ProjectsForm from './forms/ProjectsForm'
 import SummaryForm from './forms/SummaryForm'
 import OptimizationForm from './forms/OptimizationForm'
+import HelpForm from './forms/HelpForm'
 import { useUIStore, FORM_STEPS } from '@/store/uiStore'
+
+/** 0–5 是简历内容步骤，6 起是工具与帮助步骤（不显示外观设置） */
+const LAST_CONTENT_STEP = 5
 
 export default function EditorPanel() {
   const currentStep = useUIStore((s) => s.currentStep)
@@ -25,8 +29,8 @@ export default function EditorPanel() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-6">
-        {/* 简历检查分区不显示外观设置 */}
-        {currentStep !== 6 && (
+        {/* 外观设置只在简历内容步骤显示 */}
+        {currentStep <= LAST_CONTENT_STEP && (
           <Card className="mb-6 space-y-4 p-4">
             <TemplateSelector />
             <div className="h-px bg-outline" />
@@ -43,6 +47,7 @@ export default function EditorPanel() {
           {currentStep === 4 && <ProjectsForm />}
           {currentStep === 5 && <SummaryForm />}
           {currentStep === 6 && <OptimizationForm />}
+          {currentStep === 7 && <HelpForm />}
         </div>
       </div>
     </section>

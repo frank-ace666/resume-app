@@ -10,6 +10,7 @@ declare global {
       openFile: () => Promise<{ success: boolean; data?: string; filePath?: string }>
       exportPDFDialog: () => Promise<{ success: boolean; filePath?: string }>
       writePDF: (filePath: string, buffer: ArrayBuffer) => Promise<{ success: boolean }>
+      openExternal: (url: string) => Promise<{ success: boolean; error?: string }>
     }
   }
 }

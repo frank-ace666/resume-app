@@ -274,3 +274,68 @@ export const IconLoader = (p: IconProps) => (
     <path d="M12 3a9 9 0 1 0 9 9" />
   </Icon>
 )
+
+/* ===== 帮助与反馈 ===== */
+export const IconHelp = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M9.2 9a2.9 2.9 0 0 1 5.6.9c0 2-2.8 2.3-2.8 4" />
+    <path d="M12 17.2h.01" />
+  </Icon>
+)
+
+export const IconLightbulb = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M9 18h6M10 21h4" />
+    <path d="M12 3a6 6 0 0 0-3.6 10.8c.4.3.6.8.6 1.2h6c0-.5.2-.9.6-1.2A6 6 0 0 0 12 3z" />
+  </Icon>
+)
+
+export const IconHeart = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M20.4 5.6a5 5 0 0 0-7.1 0L12 6.9l-1.3-1.3a5 5 0 1 0-7.1 7.1L12 21l8.4-8.3a5 5 0 0 0 0-7.1z" />
+  </Icon>
+)
+
+export const IconSend = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M21.5 2.5L11 13" />
+    <path d="M21.5 2.5l-6.8 19-3.7-8.5-8.5-3.7z" />
+  </Icon>
+)
+
+export const IconSearch = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-3.5-3.5" />
+  </Icon>
+)
+
+export const IconThumbsUp = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M7 22V10l4.5-8a2.2 2.2 0 0 1 3 2.8L13 9h5.2a2 2 0 0 1 2 2.4l-1.4 7a2 2 0 0 1-2 1.6H7z" />
+    <path d="M7 10H3.5v12H7" />
+  </Icon>
+)
+
+export const IconThumbsDown = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M17 2v12l-4.5 8a2.2 2.2 0 0 1-3-2.8L11 15H5.8a2 2 0 0 1-2-2.4l1.4-7a2 2 0 0 1 2-1.6H17z" />
+    <path d="M17 14h3.5V2H17" />
+  </Icon>
+)
+
+export const IconCopy = (p: IconProps) => (
+  <Icon {...p}>
+    <rect x="9" y="9" width="12" height="12" rx="2" />
+    <path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1" />
+  </Icon>
+)
+
+export const IconExternal = (p: IconProps) => (
+  <Icon {...p}>
+    <path d="M14 4h6v6" />
+    <path d="M20 4l-9 9" />
+    <path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" />
+  </Icon>
+)

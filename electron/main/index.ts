@@ -1,8 +1,30 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { join } from 'path'
 import { readFile, writeFile } from 'fs/promises'
 
 let mainWindow: BrowserWindow | null = null
+
+/**
+ * 允许通过系统默认程序打开的外链协议白名单。
+ *
+ * 必须白名单：`shell.openExternal` 若接受任意协议，是一个已知的
+ * 命令执行面（例如 `file:` / 自定义协议可能被注册的程序当作参数执行）。
+ */
+const ALLOWED_PROTOCOLS = ['mailto:', 'https:', 'http:']
+
+function openExternalSafely(rawUrl: string): { success: boolean; error?: string } {
+  let parsed: URL
+  try {
+    parsed = new URL(rawUrl)
+  } catch {
+    return { success: false, error: '无效的链接' }
+  }
+  if (!ALLOWED_PROTOCOLS.includes(parsed.protocol)) {
+    return { success: false, error: `不允许打开 ${parsed.protocol} 链接` }
+  }
+  void shell.openExternal(rawUrl)
+  return { success: true }
+}
 
 function createWindow(): void {
   mainWindow = new BrowserWindow({
@@ -26,10 +48,26 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
 
+  // 站内不应发生任何导航。若渲染进程里出现 <a href> 或 window.open，
+  // 一律拦下并改由系统默认程序打开 —— 否则 mailto: 会让整个应用变成白屏。
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    openExternalSafely(url)
+    return { action: 'deny' }
+  })
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url !== mainWindow?.webContents.getURL()) {
+      event.preventDefault()
+      openExternalSafely(url)
+    }
+  })
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
 }
+
+ipcMain.handle('open-external', (_event, url: string) => openExternalSafely(url))
 
 // ====== IPC 处理：文件保存/打开 ======
 

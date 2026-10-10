@@ -21,10 +21,12 @@ export function getSectionCompletion(data: ResumeData): Record<string, boolean> 
   }
 }
 
-/** 已完成的分区数 / 需要填写的分区总数（不含「简历检查」） */
+/** 已完成的分区数 / 需要填写的分区总数（不含「简历检查」与「帮助与反馈」） */
 export function getOverallProgress(data: ResumeData): { done: number; total: number; pct: number } {
   const completion = getSectionCompletion(data)
-  const editableKeys = FORM_STEPS.filter((s) => s.key !== 'optimization').map((s) => s.key as string)
+  const editableKeys = FORM_STEPS.filter(
+    (s) => s.key !== 'optimization' && s.key !== 'support'
+  ).map((s) => s.key as string)
   const done = editableKeys.filter((k) => completion[k]).length
   const total = editableKeys.length
   return { done, total, pct: Math.round((done / total) * 100) }

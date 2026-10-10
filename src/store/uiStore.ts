@@ -12,7 +12,9 @@ export const FORM_STEPS = [
   { index: 3, label: '技能特长', key: 'skills' },
   { index: 4, label: '项目经历', key: 'projects' },
   { index: 5, label: '自我评价', key: 'summary' },
-  { index: 6, label: '简历检查', key: 'optimization' }
+  { index: 6, label: '简历检查', key: 'optimization' },
+  // 非内容步骤：不计入填写进度，也不参与检查模块的「跳转到分区」
+  { index: 7, label: '帮助与反馈', key: 'support' }
 ] as const
 
 export type FormStepKey = (typeof FORM_STEPS)[number]['key']
