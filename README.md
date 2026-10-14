@@ -20,14 +20,21 @@
 
 ## 📥 下载
 
-**[⬇️ 下载最新版安装包 → Releases](https://github.com/frank-ace666/resume-app/releases/latest)**
+**[⬇️ 下载最新版 → Releases](https://github.com/frank-ace666/resume-app/releases/latest)**
 
-- 当前版本 **v1.3.0** · Windows 10/11 (x64) · 安装包约 97 MB
-- 安装包**未做代码签名**，首次运行时 Windows SmartScreen 会提示
+当前版本 **v1.3.0** · Windows 10/11 (x64)，两种方式：
+
+| 方式 | 文件 | 说明 |
+|------|------|------|
+| **安装版**（推荐） | `ResumeCraft-Setup-1.3.0.exe`（约 97 MB） | 双击安装，可选目录，带开始菜单 / 桌面快捷方式，可正常卸载 |
+| **免安装版** | `ResumeCraft-1.3.0-win-x64-portable.zip`（约 138 MB） | 解压到任意目录，直接运行其中的 `简历工坊.exe`，删文件夹即卸载 |
+
+- 两者都**未做代码签名**，首次运行时 Windows SmartScreen 会提示
   「Windows 已保护你的电脑」—— 点「更多信息」→「仍要运行」即可。
   这是未购买签名证书的必然提示，**不是**检测到病毒。
+- 应用数据统一存在 `%APPDATA%\简历工坊`，两种方式**存档互通**，但不要同时运行两份。
 
-> 安装包是构建产物（约 97 MB），**不放进 git 仓库** —— GitHub 单文件上限 100 MB，
+> 安装包与免安装 zip 都是构建产物，**不放进 git 仓库** —— GitHub 单文件上限 100 MB，
 > 且 git 会永久保存每个版本。所有二进制一律走 Releases 分发。
 
 ---
