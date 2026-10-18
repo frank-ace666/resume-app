@@ -9,6 +9,7 @@ import type {
   Project
 } from '@/types/resume'
 import { createEmptyResume, normalizeResumeData } from '@/types/resume'
+import type { TemplateId } from '@/types/templateIds'
 
 interface ResumeStore {
   data: ResumeData
@@ -17,7 +18,7 @@ interface ResumeStore {
 
   updatePersonalInfo: (info: Partial<PersonalInfo>) => void
   updateSummary: (summary: string) => void
-  setTemplate: (templateId: string) => void
+  setTemplate: (templateId: TemplateId) => void
   setAccentColor: (color: string) => void
 
   addEducation: () => void
@@ -86,7 +87,7 @@ export const useResumeStore = create<ResumeStore>()(
 
       updateSummary: (summary) => set((s) => edited(s, { summary })),
 
-      setTemplate: (templateId) =>
+      setTemplate: (templateId: TemplateId) =>
         set((s) => edited(s, { meta: { ...s.data.meta, templateId } })),
 
       setAccentColor: (accentColor) =>
@@ -147,7 +148,7 @@ export const useResumeStore = create<ResumeStore>()(
       addSkill: () =>
         set((s) =>
           edited(s, {
-            skills: [...s.data.skills, { id: uuid(), name: '', level: 'intermediate', category: '' }]
+            skills: [...s.data.skills, { id: uuid(), name: '', category: '' }]
           })
         ),
       updateSkill: (id, skill) =>

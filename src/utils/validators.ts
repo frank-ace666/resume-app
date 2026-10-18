@@ -105,6 +105,19 @@ export function checkUrl(value: string, label = '网址'): FieldCheck {
   return OK
 }
 
+/**
+ * 微信：用户可能填微信号、绑定手机号，甚至昵称。
+ * 只拦截明显的错误（空白、超长），不强制微信号的 ASCII 规则 ——
+ * 宁可漏校验，也不要误报。
+ */
+export function checkWechat(value: string): FieldCheck {
+  const v = value.trim()
+  if (!v) return OK
+  if (/\s/.test(v)) return fail('微信号不应包含空格')
+  if (v.length > 30) return fail('微信号过长，请检查是否填错')
+  return OK
+}
+
 /* ============================================================
    自定义联系项
    ------------------------------------------------------------
@@ -180,16 +193,6 @@ export function checkGithub(value: string): FieldCheck {
   return OK
 }
 
-export function checkLinkedin(value: string): FieldCheck {
-  const v = value.trim()
-  if (!v) return OK
-  if (hasCjk(v)) return fail('LinkedIn 链接里不应出现中文')
-  // 允许只填用户名/短链，填了协议就按 URL 校验
-  if (/^https?:\/\//i.test(v)) return checkUrl(v, 'LinkedIn 链接')
-  if (!/^[a-zA-Z0-9\-_/]+$/.test(v)) return fail('LinkedIn 链接格式不正确')
-  return OK
-}
-
 /** GPA 允许 3.8、3.8/4.0、88/100、4.2 等形式 */
 export function checkGpa(value: string): FieldCheck {
   const v = value.trim()
@@ -249,9 +252,9 @@ export function collectResumeIssues(data: ResumeData): ResumeValidationIssue[] {
   const p = data.personalInfo
   push('personalInfo', '邮箱', checkEmail(p.email))
   push('personalInfo', '电话', checkPhone(p.phone))
+  push('personalInfo', '微信', checkWechat(p.wechat ?? ''))
   push('personalInfo', '个人网站', checkUrl(p.website ?? '', '个人网站'))
   push('personalInfo', 'GitHub', checkGithub(p.github ?? ''))
-  push('personalInfo', 'LinkedIn', checkLinkedin(p.linkedin ?? ''))
   for (const f of p.customFields ?? []) {
     const name = f.label?.trim() || '自定义字段'
     push('personalInfo', name, checkContact(f.kind, f.value ?? '', name))

@@ -5,7 +5,7 @@
  * 这里只回答「长什么样」。分开是为了让模板只关心摆放。
  *
  * 调研共性：姓名 18–22pt / 分区标题 14–16pt / 正文 10–12pt，
- * 行高 1.4–1.5，分区间距 > 条目间距。三套模板共用同一套尺度。
+ * 行高 1.4–1.5，分区间距 > 条目间距。所有模板共用同一套尺度。
  */
 export const TYPE = {
   name: 'text-[22px] font-bold leading-[1.2]',
@@ -50,7 +50,13 @@ export const PRINT = {
   lineSoft: '#e5e5e5',
   /** 侧栏底色 */
   sidebar: '#f5f6f7',
+  /** 深色侧栏（稳重模板）。固定中性色，避免用户选了浅强调色后白字不可读。 */
+  darkSidebar: '#1f2933',
   white: '#ffffff',
+  /** 深色侧栏上的文字层级 —— 只用 rgba，不用透明度修饰符 */
+  onDark: '#ffffff',
+  onDarkMuted: 'rgba(255, 255, 255, 0.76)',
+  onDarkFaint: 'rgba(255, 255, 255, 0.56)',
   /** 强调色块上的文字 */
   onAccent: 'rgba(255, 255, 255, 0.92)',
   onAccentFaint: 'rgba(255, 255, 255, 0.78)'

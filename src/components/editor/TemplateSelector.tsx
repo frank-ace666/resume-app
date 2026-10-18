@@ -1,12 +1,10 @@
 import { useResumeStore } from '@/store/resumeStore'
-import { TEMPLATES } from '@/utils/templateRegistry'
+import { TEMPLATES, getTemplate } from '@/utils/templateRegistry'
+import { TEMPLATE_IDS, type TemplateId } from '@/types/templateIds'
 import { IconCheck } from '@/components/ui/Icons'
 
-/** 模板按此顺序展示 */
-const TEMPLATE_ORDER = ['classic', 'modern', 'minimal'] as const
-
 /** 用极简 CSS 微缩还原每种版式的结构，比纯文字卡片更直观 */
-function Thumbnail({ id, accent }: { id: string; accent: string }) {
+function Thumbnail({ id, accent }: { id: TemplateId; accent: string }) {
   if (id === 'modern') {
     return (
       <div className="flex h-full w-full flex-col bg-white">
@@ -43,6 +41,91 @@ function Thumbnail({ id, accent }: { id: string; accent: string }) {
     )
   }
 
+  if (id === 'steady') {
+    return (
+      <div className="flex h-full w-full bg-white">
+        <div className="flex w-[34%] flex-col items-center gap-1 bg-slate-700 px-1 py-1.5">
+          <span className="h-3 w-3 rounded-full bg-slate-400" />
+          <span className="block h-0.5 w-4/5 rounded-full bg-slate-300" />
+          <span className="mt-1 block h-0.5 w-full rounded-full bg-slate-500" />
+          <span className="block h-0.5 w-full rounded-full bg-slate-500" />
+          <span className="block h-0.5 w-3/5 rounded-full bg-slate-500" />
+        </div>
+        <div className="flex-1 space-y-1 p-1.5">
+          <span className="block h-1 w-1/2 rounded-full bg-slate-400" />
+          <span className="mt-1 block h-0.5 w-1/3 rounded-full" style={{ backgroundColor: accent }} />
+          <span className="block h-0.5 w-full rounded-full bg-slate-200" />
+          <span className="block h-0.5 w-5/6 rounded-full bg-slate-200" />
+          <span className="mt-1 block h-0.5 w-1/3 rounded-full" style={{ backgroundColor: accent }} />
+          <span className="block h-0.5 w-full rounded-full bg-slate-200" />
+        </div>
+      </div>
+    )
+  }
+
+  if (id === 'elegant') {
+    return (
+      <div className="flex h-full w-full flex-col items-center gap-1 bg-white px-2 py-2">
+        <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+        <span className="block h-1 w-1/2 rounded-full bg-slate-400" />
+        <span className="block h-0.5 w-1/3 rounded-full bg-slate-300" />
+        <span className="mt-1 block h-0.5 w-1/4 rounded-full" style={{ backgroundColor: accent }} />
+        <span className="block h-0.5 w-full rounded-full bg-slate-200" />
+        <span className="block h-0.5 w-5/6 rounded-full bg-slate-200" />
+        <span className="mt-1 block h-0.5 w-1/4 rounded-full" style={{ backgroundColor: accent }} />
+        <span className="block h-0.5 w-full rounded-full bg-slate-200" />
+      </div>
+    )
+  }
+
+  if (id === 'compact') {
+    return (
+      <div className="flex h-full w-full flex-col bg-white p-1.5">
+        <div className="flex gap-1">
+          <div className="flex-1 space-y-0.5">
+            <span className="block h-1 w-1/2 rounded-full bg-slate-400" />
+            <span className="block h-0.5 w-2/3 rounded-full" style={{ backgroundColor: accent }} />
+            <span className="block h-0.5 w-full rounded-full bg-slate-200" />
+            <span className="block h-0.5 w-4/5 rounded-full bg-slate-200" />
+          </div>
+          <span className="h-5 w-3.5 shrink-0 bg-slate-300" />
+        </div>
+        <span className="mt-1 block h-1 w-full rounded-full" style={{ backgroundColor: accent }} />
+        <span className="mt-0.5 block h-0.5 w-5/6 rounded-full bg-slate-200" />
+        <span className="mt-1 block h-1 w-full rounded-full" style={{ backgroundColor: accent }} />
+        <span className="mt-0.5 block h-0.5 w-4/5 rounded-full bg-slate-200" />
+      </div>
+    )
+  }
+
+  if (id === 'fresh') {
+    return (
+      <div className="flex h-full w-full flex-col bg-white">
+        <div className="flex items-center justify-between px-1.5 py-1.5">
+          <span className="space-y-0.5">
+            <span className="block h-1 w-8 rounded-full bg-slate-400" />
+            <span className="block h-0.5 w-5 rounded-full" style={{ backgroundColor: accent }} />
+          </span>
+          <span className="h-3 w-3 rounded-full bg-slate-300" />
+        </div>
+        <div className="flex flex-1">
+          <div className="flex-1 space-y-1 p-1.5">
+            <span className="block h-0.5 w-1/4 rounded-full" style={{ backgroundColor: accent }} />
+            <span className="block h-0.5 w-full rounded-full bg-slate-200" />
+            <span className="block h-0.5 w-5/6 rounded-full bg-slate-200" />
+            <span className="block h-0.5 w-1/4 rounded-full" style={{ backgroundColor: accent }} />
+            <span className="block h-0.5 w-full rounded-full bg-slate-200" />
+          </div>
+          <div className="w-[30%] space-y-1 bg-slate-100 p-1.5">
+            <span className="block h-0.5 w-full rounded-full bg-slate-300" />
+            <span className="block h-0.5 w-4/5 rounded-full bg-slate-300" />
+            <span className="mt-1 block h-0.5 w-full rounded-full bg-slate-300" />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // classic：左侧栏 + 右侧主内容
   return (
     <div className="flex h-full w-full bg-white">
@@ -74,10 +157,13 @@ export default function TemplateSelector() {
     <div>
       <h3 className="mb-2 text-sm font-medium text-ink">简历模板</h3>
 
-      <div className="grid grid-cols-3 gap-3">
-        {TEMPLATE_ORDER.map((id) => {
+      {/* auto-fill：编辑区拖窄时自动降到 2–3 列，拖宽时 4–5 列，7 张卡不出现孤行 */}
+      <div
+        className="grid gap-2.5"
+        style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(116px, 1fr))' }}
+      >
+        {TEMPLATE_IDS.map((id) => {
           const tpl = TEMPLATES[id]
-          if (!tpl) return null
           const active = templateId === id
 
           return (
@@ -92,7 +178,7 @@ export default function TemplateSelector() {
                 ${active ? 'border-brand shadow-e1' : 'border-outline hover:border-outline-strong'}`}
             >
               {/* 缩略图 */}
-              <div className="relative h-[104px] w-full overflow-hidden border-b border-outline bg-white">
+              <div className="relative h-[96px] w-full overflow-hidden border-b border-outline bg-white">
                 <Thumbnail id={id} accent={accent} />
                 {active && (
                   <span className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-brand text-white shadow-e1">
@@ -112,7 +198,7 @@ export default function TemplateSelector() {
       </div>
 
       <p className="mt-2 text-xs leading-relaxed text-ink-3">
-        {TEMPLATES[templateId]?.description ?? ''}
+        {getTemplate(templateId).description}
       </p>
     </div>
   )

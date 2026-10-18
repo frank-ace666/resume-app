@@ -1,3 +1,5 @@
+import { isTemplateId, type TemplateId } from './templateIds'
+
 // ===== 个人信息 =====
 
 /**
@@ -28,13 +30,14 @@ export interface PersonalInfo {
   fullName: string
   email: string
   phone: string
+  /** 微信号。国内求职通常与手机号并列，作为主要联系方式。 */
+  wechat?: string
   location: string
   title: string // 求职意向/头衔
   website?: string
-  linkedin?: string
   github?: string
   avatar?: string // base64 头像
-  /** 用户自定义的联系项（QQ、微信、作品集…） */
+  /** 用户自定义的联系项（QQ、作品集…）。旧版可能还存有「微信」，normalize 会归位。 */
   customFields?: CustomField[]
 }
 
@@ -64,12 +67,13 @@ export interface WorkExperience {
 }
 
 // ===== 技能特长 =====
-export type SkillLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert'
-
+/**
+ * 技能只记录名称与分类。熟练度（入门/熟练/精通/专家）没有客观标准，
+ * 也容易被招聘方视为套话，因此不再作为数据字段。
+ */
 export interface Skill {
   id: string
   name: string
-  level: SkillLevel
   category: string
 }
 
@@ -89,7 +93,7 @@ export interface Project {
 // ===== 简历顶层结构 =====
 export interface ResumeData {
   meta: {
-    templateId: string // 'classic' | 'modern' | 'minimal'
+    templateId: TemplateId
     updatedAt: string
     version: number
     /** 简历强调色（hex）。应用 UI 与简历模板共用同一个值。 */
@@ -107,7 +111,7 @@ export interface ResumeData {
 export const DEFAULT_ACCENT = '#1a73e8'
 
 /** 当前数据结构版本。新增字段时递增，并在 normalizeResumeData 中补默认值。 */
-export const DATA_VERSION = 2
+export const DATA_VERSION = 3
 
 // ===== 空简历工厂函数 =====
 export function createEmptyResume(): ResumeData {
@@ -122,6 +126,7 @@ export function createEmptyResume(): ResumeData {
       fullName: '',
       email: '',
       phone: '',
+      wechat: '',
       location: '',
       title: ''
     },
@@ -136,6 +141,11 @@ export function createEmptyResume(): ResumeData {
 /**
  * 把任意来源（旧版本存档 / 用户手改的 JSON）补齐为完整的 ResumeData。
  * 旧文件缺少 meta.accentColor 等新字段时必须回退到默认值，而不是让模板拿到 undefined。
+ *
+ * v3 迁移：
+ * - 技能删除 level（旧值直接丢弃，技能名称保留）。
+ * - linkedin 字段删除，非空值转成「LinkedIn」自定义联系项。
+ * - 旧版通过自定义字段添加的「微信」提升为 personalInfo.wechat，并去掉重复项。
  */
 export function normalizeResumeData(raw: unknown): ResumeData {
   const base = createEmptyResume()
@@ -143,13 +153,49 @@ export function normalizeResumeData(raw: unknown): ResumeData {
 
   const input = raw as Partial<ResumeData>
   const meta = (input.meta ?? {}) as Partial<ResumeData['meta']>
-  const info = (input.personalInfo ?? {}) as Partial<PersonalInfo>
+  // linkedin 已从 PersonalInfo 移除，但旧存档里仍可能存在
+  const info = (input.personalInfo ?? {}) as Partial<PersonalInfo> & { linkedin?: unknown }
 
   const arr = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : [])
 
+  const rawCustomFields: CustomField[] = arr<CustomField>(info.customFields)
+    .filter((f) => f && typeof f.label === 'string')
+    .map((f) => ({
+      id: f.id || crypto.randomUUID(),
+      label: f.label ?? '',
+      value: f.value ?? '',
+      // 手改过的 JSON 里 kind 也可能是非法值
+      kind: CONTACT_KINDS.includes(f.kind) ? f.kind : 'text'
+    }))
+
+  // 旧版把微信放在自定义字段里；提升为主字段，避免与新的微信输入框重复
+  const isWechatLabel = (label: string) => /^(微信|微信号|wechat)$/i.test(label.trim())
+  const legacyWechat = rawCustomFields.find((f) => isWechatLabel(f.label) && f.value.trim())
+  const wechat =
+    (typeof info.wechat === 'string' ? info.wechat.trim() : '') ||
+    legacyWechat?.value.trim() ||
+    ''
+  const customFields = rawCustomFields.filter((f) => !isWechatLabel(f.label))
+
+  // 旧版 LinkedIn：降级为自定义联系项，值本身不丢
+  const legacyLinkedin = typeof info.linkedin === 'string' ? info.linkedin.trim() : ''
+  if (legacyLinkedin) {
+    const alreadyImported = customFields.some(
+      (f) => f.label.trim().toLowerCase() === 'linkedin' && f.value.trim() === legacyLinkedin
+    )
+    if (!alreadyImported) {
+      customFields.push({
+        id: crypto.randomUUID(),
+        label: 'LinkedIn',
+        value: legacyLinkedin,
+        kind: /^https?:\/\//i.test(legacyLinkedin) ? 'url' : 'text'
+      })
+    }
+  }
+
   return {
     meta: {
-      templateId: typeof meta.templateId === 'string' ? meta.templateId : base.meta.templateId,
+      templateId: isTemplateId(meta.templateId) ? meta.templateId : base.meta.templateId,
       updatedAt: typeof meta.updatedAt === 'string' ? meta.updatedAt : base.meta.updatedAt,
       version: DATA_VERSION,
       accentColor: typeof meta.accentColor === 'string' ? meta.accentColor : DEFAULT_ACCENT
@@ -158,21 +204,13 @@ export function normalizeResumeData(raw: unknown): ResumeData {
       fullName: info.fullName ?? '',
       email: info.email ?? '',
       phone: info.phone ?? '',
+      wechat,
       location: info.location ?? '',
       title: info.title ?? '',
       website: info.website,
-      linkedin: info.linkedin,
       github: info.github,
       avatar: info.avatar,
-      // 旧存档没有这一项；手改过的 JSON 里 kind 也可能是非法值
-      customFields: arr<CustomField>(info.customFields)
-        .filter((f) => f && typeof f.label === 'string')
-        .map((f) => ({
-          id: f.id || crypto.randomUUID(),
-          label: f.label ?? '',
-          value: f.value ?? '',
-          kind: CONTACT_KINDS.includes(f.kind) ? f.kind : 'text'
-        }))
+      customFields
     },
     summary: typeof input.summary === 'string' ? input.summary : '',
     education: arr<Education>(input.education).map((e) => ({
@@ -196,10 +234,9 @@ export function normalizeResumeData(raw: unknown): ResumeData {
       description: w.description ?? '',
       achievements: Array.isArray(w.achievements) ? w.achievements : []
     })),
-    skills: arr<Skill>(input.skills).map((s) => ({
+    skills: arr<Skill & { level?: unknown }>(input.skills).map((s) => ({
       id: s.id || crypto.randomUUID(),
       name: s.name ?? '',
-      level: s.level ?? 'intermediate',
       category: s.category ?? ''
     })),
     projects: arr<Project>(input.projects).map((p) => ({

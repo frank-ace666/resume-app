@@ -71,11 +71,11 @@
 ```
 ResumeData
 ├── meta: { templateId, updatedAt, version }
-├── personalInfo: { fullName, email, phone, location, title, ... }
+├── personalInfo: { fullName, email, phone, wechat, location, title, website?, github?, customFields? }
 ├── summary: string
 ├── education[]: { id, school, degree, major, startDate, endDate, gpa }
 ├── workExperience[]: { id, company, position, startDate, endDate, isCurrent, achievements[] }
-├── skills[]: { id, name, level(4档), category }
+├── skills[]: { id, name, category }
 └── projects[]: { id, name, role, startDate, endDate, description, technologies[], highlights[] }
 ```
 
@@ -169,7 +169,7 @@ resume-app/
 │   │   ├── editor/                   # 编辑器：面板 + 模板选择 + 主题色 + 表单脚手架
 │   │   │   └── forms/               # 7 个步骤表单（每个独立文件）
 │   │   ├── preview/                  # 预览器：面板 + 缩放工具栏 + 渲染容器
-│   │   └── templates/               # 3 个简历模板 + shared.tsx（排版尺度与打印色板）
+│   │   └── templates/               # 7 个简历模板 + blocks.tsx / shared.tsx（共享原语、排版尺度与打印色板）
 │   │
 │   ├── hooks/                        # 自定义 Hook
 │   │   ├── useAutoSave.ts            # 自动保存逻辑（防抖 → localStorage）
@@ -304,30 +304,39 @@ Tailwind v4 的工具类都在 `@layer utilities` 里，所以项目自定义样
 ### 模板的分层：模型归一化，模板只管摆放
 
 ```
-ResumeData ──buildResumeModel()──▶ ResumeModel ──▶ 三个模板（纯 JSX）
-              templates/model.ts                    Classic / Modern / Minimal
+ResumeData ──buildResumeModel()──▶ ResumeModel ──▶ 七个模板（纯 JSX）
+              templates/model.ts                    Classic / Modern / Minimal / Steady / Elegant / Compact / Fresh
 ```
 
-**为什么要这一层**：三个模板此前各自判断「这条经历是不是空的」「日期怎么拼」
-「熟练度显示成什么字」—— 同一个决定做三遍，改一处忘两处是迟早的事。
+**为什么要这一层**：模板此前各自判断「这条经历是不是空的」「日期怎么拼」
+「联系方式怎么拼」—— 同一个决定做七遍，改一处忘六处是迟早的事。
 现在归一化只做一次，模板里不再有 `if (!x) return null`、`nonEmpty()`、`?.trim()`：
 拿到的数组里没有空条目，字段都是可直接渲染的字符串。
 
+联系方式在模型里统一成 `ContactItem { id, label, value }`，模板通过
+`templates/blocks.tsx` 的 `ContactList` 渲染。**标签（电话、邮箱、微信…）由模型给出、
+由共享组件保证出现**，模板只选横排/竖排/两列，不自行拼字符串。
+
 **边界要守住**：归一化进模型，**排版留在模板**。
-三者怎么摆是刻意的差异（时间在右、职位是否另起一行、技能是分组还是横排），
+各模板怎么摆是刻意的差异（时间在右、职位是否另起一行、技能是分组还是横排），
 不该被"统一"掉。
 
-- 数据归一化（含空值剔除、日期拼接、技能分组）→ `templates/model.ts`
+- 数据归一化（含空值剔除、日期拼接、联系方式标签、技能分组）→ `templates/model.ts`
+- 共享文本原语（带标签联系方式、条目头部）→ `templates/blocks.tsx`
 - 排版尺度与打印色板 → `templates/shared.tsx`
 
 ### 模板样式策略
 
 - 排版尺度统一由 `shared.tsx` 的 `TYPE` 提供：姓名 22px/700、分区标题 13px/700、正文 13px/1.55、日期 11.5px
-- 强调色由 `meta.accentColor` 驱动，经 `ensureContrastOnWhite()` 压暗到白底 4.5:1 后使用；全篇只出现在分区标题与分隔线上
-- 3 个模板的视觉差异：
+- 强调色由 `meta.accentColor` 驱动，经 `ensureContrastOnWhite()` 压暗到白底 4.5:1 后使用；深色侧栏使用固定的 `PRINT.darkSidebar`，避免浅强调色导致白字不可读
+- 7 个模板的视觉差异：
   - **经典**：`flex` 两栏，左侧灰底放姓名+联系方式+技能，右侧白底放经历（侧栏始终渲染）
   - **现代**：顶部实心强调色块 + 强调色竖条标题
   - **简约**：纯单栏全白，大量留白，`tracking-[0.18em]` 小标题，最 ATS 友好
+  - **稳重**：深色左栏 + 白色主栏，适合国企/金融等正式岗位
+  - **雅致**：居中单栏，中文标题 + 英文小字 + 细线
+  - **紧凑**：高密度单栏，顶部两列联系方式 + 证件照，强调色实心分区条
+  - **清新**：全宽头部 + 左侧正文 + 右侧浅色信息栏
 - 条目加 `break-inside-avoid`，避免分页把一段经历切断
 
 ---

@@ -6,9 +6,9 @@ import { TextField, ValidatedTextField } from '@/components/ui/TextField'
 import Button from '@/components/ui/Button'
 import {
   IconCamera,
+  IconChat,
   IconGithub,
   IconGlobe,
-  IconLinkedin,
   IconMail,
   IconMapPin,
   IconPhone,
@@ -20,9 +20,9 @@ import CustomFieldsEditor from './CustomFieldsEditor'
 import {
   checkEmail,
   checkGithub,
-  checkLinkedin,
   checkPhone,
   checkUrl,
+  checkWechat,
   type FieldCheck
 } from '@/utils/validators'
 
@@ -39,24 +39,31 @@ const FIELDS: FieldDef[] = [
   { key: 'fullName', label: '姓名', placeholder: '你的全名', icon: <IconUser size={16} /> },
   { key: 'title', label: '求职意向', placeholder: '如：前端开发工程师' },
   {
+    key: 'phone',
+    label: '电话',
+    placeholder: '11 位手机号，或带区号的固话',
+    icon: <IconPhone size={16} />,
+    validate: checkPhone
+  },
+  {
     key: 'email',
     label: '邮箱',
-    placeholder: 'example@email.com',
+    placeholder: 'example@qq.com',
     icon: <IconMail size={16} />,
     validate: checkEmail
   },
   {
-    key: 'phone',
-    label: '电话',
-    placeholder: '手机号码或带区号的固话',
-    icon: <IconPhone size={16} />,
-    validate: checkPhone
+    key: 'wechat',
+    label: '微信',
+    placeholder: '微信号或绑定手机号',
+    icon: <IconChat size={16} />,
+    validate: checkWechat
   },
   { key: 'location', label: '所在地（选填）', placeholder: '如：北京', icon: <IconMapPin size={16} /> },
   {
     key: 'website',
     label: '个人网站（选填）',
-    placeholder: 'https://example.dev',
+    placeholder: 'https://example.cn',
     icon: <IconGlobe size={16} />,
     validate: (v) => checkUrl(v, '个人网站')
   },
@@ -66,13 +73,6 @@ const FIELDS: FieldDef[] = [
     placeholder: '用户名或主页链接',
     icon: <IconGithub size={16} />,
     validate: checkGithub
-  },
-  {
-    key: 'linkedin',
-    label: 'LinkedIn（选填）',
-    placeholder: '用户名或链接',
-    icon: <IconLinkedin size={16} />,
-    validate: checkLinkedin
   }
 ]
 
@@ -197,7 +197,9 @@ export default function PersonalInfoForm() {
         <h2 className="text-base font-medium text-ink">个人信息</h2>
         <p className="mt-1 text-sm text-ink-2">
           填写基本信息与求职意向，让 HR 一眼了解你。
-          <span className="text-ink-3">标注「选填」的可以留空。</span>
+          <span className="text-ink-3">
+            国内求职通常留手机号 + 微信；标注「选填」的可以留空。
+          </span>
         </p>
       </div>
 

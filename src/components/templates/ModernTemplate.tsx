@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import type { ResumeData } from '@/types/resume'
 import { buildResumeModel } from './model'
+import { ContactList } from './blocks'
 import { TYPE, PRINT, PAGE_PADDING } from './shared'
 
 /** 现代：顶部实心强调色块 + 强调色竖条标题。全篇仅标题与色块使用强调色。 */
@@ -66,9 +67,14 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
               </p>
             )}
             {m.contacts.length > 0 && (
-              <p className={`${TYPE.contact} mt-2.5`} style={{ color: PRINT.onAccentFaint }}>
-                {m.contacts.join('  ·  ')}
-              </p>
+              <ContactList
+                contacts={m.contacts}
+                layout="inline"
+                labelColor={PRINT.onAccentFaint}
+                valueColor={PRINT.onAccent}
+                separatorColor={PRINT.onAccentFaint}
+                className="mt-2.5"
+              />
             )}
           </div>
         </div>
@@ -179,7 +185,7 @@ export default function ModernTemplate({ data }: { data: ResumeData }) {
                     {g.category}
                   </span>
                   <p className={TYPE.body} style={{ color: PRINT.body }}>
-                    {g.items.map((s) => `${s.name}（${s.levelLabel}）`).join('、')}
+                    {g.items.map((s) => s.name).join('、')}
                   </p>
                 </Fragment>
               ))}

@@ -7,7 +7,8 @@ import {
   isUrl,
   isGithubUsername,
   normalizeGithub,
-  checkContact
+  checkContact,
+  checkWechat
 } from './validators'
 
 // ====== 规则类型 ======
@@ -196,6 +197,24 @@ const formatRules: CheckRule[] = [
         `当前填写的 "${data.personalInfo.phone.trim()}" 不是标准的 11 位手机号格式。`,
         '请填写 11 位手机号码，如 13800138000。如果是固定电话请加区号。',
         data.personalInfo.phone.trim()
+      )
+    }
+    return null
+  },
+
+  (data) => {
+    const wechat = data.personalInfo.wechat?.trim() ?? ''
+    const result = checkWechat(wechat)
+    if (!result.ok) {
+      return makeIssue(
+        'info',
+        'format',
+        'personalInfo',
+        'personalInfo.wechat',
+        '微信号格式可能不正确',
+        `当前填写的 "${wechat}" 无法通过格式检查。`,
+        result.message ?? '请检查微信号是否包含空格或超长内容。',
+        wechat
       )
     }
     return null

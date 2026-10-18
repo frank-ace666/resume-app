@@ -1,20 +1,23 @@
 {
   "meta": {
     "templateId": "classic",
-    "updatedAt": "2026-10-10T00:00:00.000Z",
-    "version": 2,
+    "updatedAt": "2026-10-18T00:00:00.000Z",
+    "version": 3,
     "accentColor": "#1f4e79"
   },
   "personalInfo": {
     "fullName": "示例·前端",
-    "email": "example@example.com",
-    "phone": "138-0000-0000",
+    "email": "example@qq.com",
+    "phone": "13800138000",
+    "wechat": "example_wechat",
     "location": "北京",
     "title": "前端开发工程师",
-    "website": "https://example.dev",
+    "website": "https://example.cn",
     "github": "example-dev",
-    "linkedin": "",
-    "avatar": ""
+    "avatar": "",
+    "customFields": [
+      { "id": "custom-1", "label": "QQ", "value": "123456789", "kind": "number" }
+    ]
   },
   "summary": "4 年前端开发经验，熟练运用 Vue 3 与 TypeScript，主导过中后台系统架构重构，首屏加载时间下降 42%。习惯用数据驱动性能优化，推动过 3 次跨团队协作并沉淀公共组件库。",
   "education": [
@@ -87,17 +90,17 @@
     }
   ],
   "skills": [
-    { "id": "skill-1", "name": "TypeScript", "level": "advanced", "category": "编程语言" },
-    { "id": "skill-2", "name": "JavaScript", "level": "advanced", "category": "编程语言" },
-    { "id": "skill-3", "name": "Vue 3", "level": "expert", "category": "前端框架" },
-    { "id": "skill-4", "name": "React", "level": "intermediate", "category": "前端框架" },
-    { "id": "skill-5", "name": "Element Plus", "level": "advanced", "category": "前端框架" },
-    { "id": "skill-6", "name": "ECharts", "level": "advanced", "category": "数据可视化" },
-    { "id": "skill-7", "name": "Vite", "level": "advanced", "category": "工程化" },
-    { "id": "skill-8", "name": "Webpack", "level": "intermediate", "category": "工程化" },
-    { "id": "skill-9", "name": "Git", "level": "advanced", "category": "工程化" },
-    { "id": "skill-10", "name": "Node.js", "level": "intermediate", "category": "后端与数据库" },
-    { "id": "skill-11", "name": "MySQL", "level": "beginner", "category": "后端与数据库" },
-    { "id": "skill-12", "name": "微信小程序", "level": "intermediate", "category": "跨端开发" }
+    { "id": "skill-1", "name": "TypeScript", "category": "编程语言" },
+    { "id": "skill-2", "name": "JavaScript", "category": "编程语言" },
+    { "id": "skill-3", "name": "Vue 3", "category": "前端框架" },
+    { "id": "skill-4", "name": "React", "category": "前端框架" },
+    { "id": "skill-5", "name": "Element Plus", "category": "前端框架" },
+    { "id": "skill-6", "name": "ECharts", "category": "数据可视化" },
+    { "id": "skill-7", "name": "Vite", "category": "工程化" },
+    { "id": "skill-8", "name": "Webpack", "category": "工程化" },
+    { "id": "skill-9", "name": "Git", "category": "工程化" },
+    { "id": "skill-10", "name": "Node.js", "category": "后端与数据库" },
+    { "id": "skill-11", "name": "MySQL", "category": "后端与数据库" },
+    { "id": "skill-12", "name": "微信小程序", "category": "跨端开发" }
   ]
 }

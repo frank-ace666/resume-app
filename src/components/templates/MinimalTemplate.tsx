@@ -1,6 +1,7 @@
 import { Fragment } from 'react'
 import type { ResumeData } from '@/types/resume'
 import { buildResumeModel } from './model'
+import { ContactList } from './blocks'
 import { TYPE, PRINT } from './shared'
 
 /**
@@ -82,9 +83,14 @@ export default function MinimalTemplate({ data }: { data: ResumeData }) {
         <div className="mt-4 h-px w-10" style={{ backgroundColor: m.accent.raw }} />
 
         {m.contacts.length > 0 && (
-          <p className={`${TYPE.contact} mt-4`} style={{ color: PRINT.faint }}>
-            {m.contacts.join('  ·  ')}
-          </p>
+          <ContactList
+            contacts={m.contacts}
+            layout="inline"
+            labelColor={PRINT.faint}
+            valueColor={PRINT.body}
+            separatorColor={PRINT.line}
+            className="mt-4"
+          />
         )}
       </header>
 
@@ -173,7 +179,7 @@ export default function MinimalTemplate({ data }: { data: ResumeData }) {
                     {g.category}
                   </span>
                   <p className={TYPE.body} style={{ color: PRINT.body }}>
-                    {g.items.map((s) => `${s.name}（${s.levelLabel}）`).join('、')}
+                    {g.items.map((s) => s.name).join('、')}
                   </p>
                 </Fragment>
               ))}

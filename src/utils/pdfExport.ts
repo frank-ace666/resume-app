@@ -44,17 +44,89 @@ function ensureStabilizeStyle(): void {
   document.head.appendChild(style)
 }
 
+interface TransformOverride {
+  el: HTMLElement
+  previousInline: string
+}
+
+/**
+ * 临时取消捕获节点祖先上的 transform（预览区的缩放）。
+ *
+ * 为什么必须做：预览通过父层 `transform: scale(...)` 缩放，节点本身保持 1:1。
+ * 但 html2canvas 会克隆整条祖先链 —— 克隆里的元素仍带着缩放矩阵，
+ * 而画布尺寸按未缩放的 `offsetWidth` 计算，结果只截到左上角，
+ * 右侧日期与文字被裁掉。预览缩放到 100% 时问题不出现，所以很容易漏测。
+ */
+function neutralizeAncestorTransforms(element: HTMLElement): TransformOverride[] {
+  const overrides: TransformOverride[] = []
+  let node = element.parentElement
+
+  while (node && node !== document.body) {
+    if (getComputedStyle(node).transform !== 'none') {
+      overrides.push({ el: node, previousInline: node.style.transform })
+      node.style.transform = 'none'
+    }
+    node = node.parentElement
+  }
+
+  return overrides
+}
+
+function restoreTransforms(overrides: TransformOverride[]): void {
+  for (let i = overrides.length - 1; i >= 0; i--) {
+    const { el, previousInline } = overrides[i]
+    if (previousInline) el.style.transform = previousInline
+    else el.style.removeProperty('transform')
+  }
+}
+
 /** 捕获期间冻结布局状态，结束后恢复 */
 async function withStabilizedLayout<T>(element: HTMLElement, fn: () => Promise<T>): Promise<T> {
   ensureStabilizeStyle()
   element.classList.add(STABILIZE_CLASS)
+  const transformOverrides = neutralizeAncestorTransforms(element)
   // 等一帧，确保样式已应用
   await new Promise((r) => requestAnimationFrame(() => r(null)))
   try {
     return await fn()
   } finally {
     element.classList.remove(STABILIZE_CLASS)
+    restoreTransforms(transformOverrides)
   }
+}
+
+/**
+ * 从画布底部向上跳过纯白行，返回有效内容高度。
+ *
+ * 为什么需要：模板用 `min-height: 297mm` + 底部留白，内容刚好一页时
+ * 仍可能多出几像素到几十像素的纯白 —— 直接按 canvas.height 分页会生成
+ * 一张只有底边留白的空白页（实测现代模板多出 57px 的第二页）。
+ */
+function measureContentHeight(canvas: HTMLCanvasElement): number {
+  let data: Uint8ClampedArray
+  try {
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return canvas.height
+    data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
+  } catch {
+    // 画布被跨域图片污染时无法读取像素，退回完整高度
+    return canvas.height
+  }
+
+  const rowBytes = canvas.width * 4
+  const isBlankRow = (y: number) => {
+    const offset = y * rowBytes
+    for (let x = 0; x < canvas.width; x++) {
+      const i = offset + x * 4
+      // 允许抗锯齿/JPEG 的轻微偏差；纯白或近乎纯白都算空白
+      if (data[i] < 248 || data[i + 1] < 248 || data[i + 2] < 248) return false
+    }
+    return true
+  }
+
+  let bottom = canvas.height - 1
+  while (bottom >= 0 && isBlankRow(bottom)) bottom--
+  return bottom + 1
 }
 
 /**
@@ -86,14 +158,15 @@ async function buildPdf(element: HTMLElement): Promise<jsPDF> {
   const pxPerMm = canvas.width / elementWidthMm
 
   const pageHeightPx = A4_HEIGHT_MM * pxPerMm
-  // 减 1px 容差：元素高度恰为 297mm 时避免因浮点误差多出一张空白页
-  const pageCount = Math.max(1, Math.ceil((canvas.height - 1) / pageHeightPx))
+  const contentHeightPx = measureContentHeight(canvas)
+  // 减 1px 容差：内容高度恰为 297mm 时避免因浮点误差多出一张空白页
+  const pageCount = Math.max(1, Math.ceil((contentHeightPx - 1) / pageHeightPx))
 
   for (let page = 0; page < pageCount; page++) {
     if (page > 0) pdf.addPage()
 
     const sliceTop = page * pageHeightPx
-    const sliceHeight = Math.min(pageHeightPx, canvas.height - sliceTop)
+    const sliceHeight = Math.min(pageHeightPx, contentHeightPx - sliceTop)
 
     const slice = document.createElement('canvas')
     slice.width = canvas.width

@@ -3,8 +3,8 @@ import { useResumeStore } from '@/store/resumeStore'
 import type { ContactKind, CustomField } from '@/types/resume'
 import { CONTACT_KINDS } from '@/types/resume'
 import { CONTACT_PRESETS, presetByLabel, inferContactKind } from '@/data/contactPresets'
-import { CONTACT_KIND_LABEL, checkContact, errorOf } from '@/utils/validators'
-import { TextField, ValidatedTextField } from '@/components/ui/TextField'
+import { CONTACT_KIND_LABEL, checkContact } from '@/utils/validators'
+import { ValidatedTextField } from '@/components/ui/TextField'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { IconPlus, IconTrash } from '@/components/ui/Icons'
@@ -63,8 +63,8 @@ export default function CustomFieldsEditor() {
       <div>
         <h3 className="text-sm font-medium text-ink">更多联系方式</h3>
         <p className="mt-1 text-xs leading-relaxed text-ink-3">
-          国内求职常写 QQ、微信；设计和前端岗位常附作品集。点一下即可添加，
-          也可以完全自定义名称与类型。
+          微信在上方直接填写；这里可加 QQ、备用邮箱、作品集等。
+          点一下即可添加，也可以完全自定义名称与类型。
         </p>
       </div>
 

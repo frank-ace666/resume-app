@@ -1,5 +1,4 @@
 import { useResumeStore } from '@/store/resumeStore'
-import type { SkillLevel } from '@/types/resume'
 import { TextField } from '@/components/ui/TextField'
 import EmptyState from '@/components/ui/EmptyState'
 import Button from '@/components/ui/Button'
@@ -7,13 +6,6 @@ import Card from '@/components/ui/Card'
 import { FormHeader } from '../FormScaffold'
 import { IconPlus, IconTrash, IconWrench } from '@/components/ui/Icons'
 import { groupSkills } from '@/components/templates/model'
-
-const LEVELS: { value: SkillLevel; label: string }[] = [
-  { value: 'beginner', label: '入门' },
-  { value: 'intermediate', label: '熟练' },
-  { value: 'advanced', label: '精通' },
-  { value: 'expert', label: '专家' }
-]
 
 /** 常见技能快捷添加，降低新手的空白页焦虑 */
 const QUICK_ADD: { name: string; category: string }[] = [
@@ -44,7 +36,7 @@ export default function SkillsForm() {
     const list = useResumeStore.getState().data.skills
     const last = list[list.length - 1]
     if (last) {
-      update(last.id, { name: preset.name, category: preset.category, level: 'intermediate' })
+      update(last.id, { name: preset.name, category: preset.category })
     }
   }
 
@@ -52,7 +44,7 @@ export default function SkillsForm() {
     <div className="space-y-5">
       <FormHeader
         title="技能特长"
-        description="按分类列出技能，熟练度用文字标注即可 —— 进度条和星级反而会被招聘方扣分。"
+        description="按分类列出技能名称即可，不需要标注熟练度 —— 进度条、星级和「精通/熟练」都不是客观标准。"
         actionLabel="添加"
         onAction={add}
       />
@@ -86,37 +78,13 @@ export default function SkillsForm() {
           <div className="space-y-3">
             {skills.map((skill) => (
               <Card key={skill.id} className="anim-pop-in p-3">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_120px_1fr_auto] sm:items-center">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
                   <TextField
                     label="技能名称"
                     placeholder="如 React"
                     value={skill.name}
                     onChange={(e) => update(skill.id, { name: e.target.value })}
                   />
-
-                  {/* Material 风格下拉 */}
-                  <div className="relative">
-                    <select
-                      value={skill.level}
-                      onChange={(e) => update(skill.id, { level: e.target.value as SkillLevel })}
-                      aria-label="熟练程度"
-                      className="peer h-12 w-full appearance-none rounded-xs border border-outline bg-transparent px-3.5 pr-9 text-sm text-ink transition-colors duration-[var(--duration-fast)] focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
-                    >
-                      {LEVELS.map((l) => (
-                        <option key={l.value} value={l.value}>
-                          {l.label}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink-3">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M6 9l6 6 6-6" />
-                      </svg>
-                    </span>
-                    <span className="pointer-events-none absolute left-2.5 top-0 z-10 -translate-y-1/2 bg-surface px-1 text-[11px] text-ink-3">
-                      熟练度
-                    </span>
-                  </div>
 
                   <TextField
                     label="分类"

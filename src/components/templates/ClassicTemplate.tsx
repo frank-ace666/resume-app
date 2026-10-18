@@ -1,5 +1,6 @@
 import type { ResumeData } from '@/types/resume'
 import { buildResumeModel } from './model'
+import { ContactList } from './blocks'
 import { TYPE, PRINT } from './shared'
 
 /**
@@ -61,13 +62,12 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
 
         {m.contacts.length > 0 && (
           <SideSection title="联系方式">
-            <ul className="space-y-1.5">
-              {m.contacts.map((c, i) => (
-                <li key={i} className={`${TYPE.contact} break-all`} style={{ color: PRINT.body }}>
-                  {c}
-                </li>
-              ))}
-            </ul>
+            <ContactList
+              contacts={m.contacts}
+              layout="stacked"
+              labelColor={PRINT.muted}
+              valueColor={PRINT.body}
+            />
           </SideSection>
         )}
 
@@ -79,19 +79,12 @@ export default function ClassicTemplate({ data }: { data: ResumeData }) {
                   <p className={`${TYPE.meta} mb-1 font-medium`} style={{ color: PRINT.muted }}>
                     {g.category}
                   </p>
-                  <ul className="space-y-0.5">
-                    {g.items.map((s) => (
-                      <li
-                        key={s.id}
-                        className={`${TYPE.contact} flex items-baseline justify-between gap-2`}
-                      >
-                        <span style={{ color: PRINT.body }}>{s.name}</span>
-                        <span className="shrink-0" style={{ color: PRINT.faint }}>
-                          {s.levelLabel}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+                  <p
+                    className={`${TYPE.contact} break-words leading-relaxed`}
+                    style={{ color: PRINT.body }}
+                  >
+                    {g.items.map((s) => s.name).join('、')}
+                  </p>
                 </div>
               ))}
             </div>

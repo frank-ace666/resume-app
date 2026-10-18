@@ -18,11 +18,10 @@ export interface ContactPreset {
 }
 
 export const CONTACT_PRESETS: ContactPreset[] = [
-  // —— 国内求职最常见的两个 ——
+  // —— 国内求职最常见 ——
+  // 微信与手机已是个人信息里的独立字段，不再重复放预设
   { label: 'QQ', kind: 'number', placeholder: 'QQ 号', group: '国内常用' },
-  { label: '微信', kind: 'account', placeholder: '微信号', group: '国内常用' },
-  { label: '手机', kind: 'phone', placeholder: '手机号码', group: '国内常用' },
-  { label: '备用邮箱', kind: 'email', placeholder: 'backup@example.com', group: '国内常用' },
+  { label: '备用邮箱', kind: 'email', placeholder: 'backup@163.com', group: '国内常用' },
 
   // —— 技术/内容社区 ——
   { label: '掘金', kind: 'account', placeholder: '掘金用户名', group: '社区' },
@@ -34,10 +33,10 @@ export const CONTACT_PRESETS: ContactPreset[] = [
   { label: '微信公众号', kind: 'account', placeholder: '公众号名称', group: '社区' },
 
   // —— 作品集（设计/前端常用）——
-  { label: '作品集', kind: 'url', placeholder: 'https://your-portfolio.dev', group: '作品集' },
-  { label: '个人博客', kind: 'url', placeholder: 'https://blog.example.dev', group: '作品集' },
-  { label: 'Dribbble', kind: 'url', placeholder: 'https://dribbble.com/username', group: '作品集' },
-  { label: 'Behance', kind: 'url', placeholder: 'https://behance.net/username', group: '作品集' },
+  { label: '作品集', kind: 'url', placeholder: 'https://your-portfolio.cn', group: '作品集' },
+  { label: '个人博客', kind: 'url', placeholder: 'https://blog.example.cn', group: '作品集' },
+  { label: '语雀', kind: 'url', placeholder: 'https://www.yuque.com/username', group: '作品集' },
+  { label: 'CSDN', kind: 'url', placeholder: 'https://blog.csdn.net/username', group: '作品集' },
   { label: '站酷', kind: 'url', placeholder: 'https://www.zcool.com.cn/u/xxxxx', group: '作品集' }
 ]
 
@@ -61,6 +60,7 @@ export function inferContactKind(label: string): ContactKind {
   const t = label.trim()
   if (/网址|主页|博客|作品集|链接|portfolio|site|url/i.test(t)) return 'url'
   if (/邮箱|邮件|mail/i.test(t)) return 'email'
+  if (/微信|wechat/i.test(t)) return 'account'
   if (/电话|手机|座机|tel|phone/i.test(t)) return 'phone'
   if (/号$|号码|qq/i.test(t)) return 'number'
   return 'text'

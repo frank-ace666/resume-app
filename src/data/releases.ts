@@ -25,6 +25,38 @@ export const KIND_LABEL: Record<Release['highlights'][number]['kind'], string> =
 
 export const RELEASES: Release[] = [
   {
+    version: '1.3.1',
+    date: '2026-10-18',
+    headline: '模板增至 7 套，联系方式更贴近国内求职',
+    highlights: [
+      {
+        kind: 'new',
+        title: '新增 4 套模板',
+        desc: '新增稳重、雅致、紧凑、清新，共 7 套模板；在编辑器顶部随时切换，已填内容不会丢。'
+      },
+      {
+        kind: 'improve',
+        title: '技能不再标注熟练度',
+        desc: '移除「入门 / 熟练 / 精通 / 专家」选项，只填写技能名称和分类，避免无法验证的主观分级。'
+      },
+      {
+        kind: 'improve',
+        title: '联系方式直接写清是什么',
+        desc: '简历上的联系方式现在显示「电话：…」「邮箱：…」「微信：…」等标签，不再只有一串号码。'
+      },
+      {
+        kind: 'new',
+        title: '微信成为主要联系方式',
+        desc: '个人信息新增微信，移除 LinkedIn；旧存档里的 LinkedIn 会自动转为自定义联系项，不会丢失。'
+      },
+      {
+        kind: 'fix',
+        title: '修好 PDF 导出被裁切',
+        desc: '预览处于「适应宽度」缩放时，导出的 PDF 只保留左上角；现在无论怎么缩放都能完整导出，并去掉了多余的空白尾页。'
+      }
+    ]
+  },
+  {
     version: '1.3.0',
     date: '2026-10-10',
     headline: '可以检查更新了，并修好了「换不了模板」',

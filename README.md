@@ -2,141 +2,49 @@
 
 > **轻量化简历制作桌面应用** · 面向求职新手（学生、转行从业者）
 >
-> 🖥️ Windows 桌面应用 · Electron + React + TypeScript + Tailwind CSS v4
+> Windows 10 / 11 · 完全离线 · 数据只保存在本机
 
----
-
-## 🤖 AI 开发声明
-
-**本项目由 AI（Claude Code + deepseek-v4-pro）辅助开发完成。** 人类开发者提供需求方向、设计决策和代码审核，AI 负责架构设计、代码编写和文档生成。所有代码均经过 TypeScript 类型检查和构建验证。
-
-- 开发周期：2026-06-24（1天）
-- AI 贡献：架构设计、全部代码、3份文档
-- 人类贡献：需求定义、技术选型决策、关键设计约束（11维度分析）
-
-> ⚠️ **注意**：本应用的简历优化模块仅做规则性检查和表达建议，**不会编造任何工作经历、项目、技能等虚假信息**。所有内容均由用户自行填写。
-
----
-
-## ✨ 功能
+## ✨ 主要功能
 
 | 功能 | 说明 |
 |------|------|
-| 📝 **3 个简历模板** | 经典（双栏）、现代（色块+竖条）、简约（单栏留白，最 ATS 友好） |
-| 🎨 **主题色** | 8 个专业预设 + 自定义，同时应用到界面与简历标题 |
-| ✏️ **7 步表单** | 个人信息（含头像）、教育、工作、技能、项目、自我评价、简历检查 |
-| 👁️ **实时预览** | A4 预览，25%–200% 缩放、适应宽度、Ctrl+滚轮、**分页参考线** |
-| 🖥️ **可调布局** | 拖拽分隔条调整编辑/预览比例，支持「专注预览」折叠编辑区 |
-| 📤 **导出 PDF** | 所见即所得，中文支持，**超过一页自动分页**（不再截断） |
-| 💾 **本地保存** | JSON 文件保存/打开 + 自动保存，旧存档自动补齐新字段 |
-| 🔍 **简历检查** | 27 条规则引擎：完整性、格式、表达质量、一致性 |
+| 📝 **7 套简历模板** | 经典、现代、简约、稳重、雅致、紧凑、清新，可随时切换 |
+| 🎨 **主题色** | 8 个专业预设 + 自定义，同时应用到界面和简历标题 |
+| ✏️ **分区填写** | 个人信息（含头像）、教育、工作、技能、项目、自我评价 |
+| 👁️ **实时预览** | A4 版式，支持缩放、适应宽度、Ctrl+滚轮、专注预览 |
+| 📤 **导出 PDF** | 所见即所得，超过一页自动分页 |
+| 💾 **本地保存** | 自动保存；也可另存为 JSON 文件或打开已有存档 |
+| 🔍 **简历检查** | 检查完整性、格式、表达和一致性，给出修改建议 |
 
-> 界面为 Material 风格（Gmail / YouTube 系）：左侧分区导航带完成度与问题徽标、
-> 顶部应用栏、涟漪与过渡动效、snackbar 提示，并遵循系统「减少动态效果」设置。
->
-> 简历模板本身**刻意不使用**这套界面语言 —— 它是要打印和过机器筛选的文档，
-> 只用单一强调色、纯文字熟练度、无 emoji 图标，以保证 ATS 解析与灰度打印都不出问题。
+> 简历模板针对打印和机器筛选做了优化：单一强调色、技能仅列名称、不使用 emoji 图标。
 
-## 🚀 快速开始
+## 🚀 下载与安装
 
-```bash
-# 安装依赖
-npm install
+- 下载最新安装包：[GitHub Releases](https://github.com/frank-ace666/resume-app/releases/latest)
+- 双击安装包，按提示选择安装目录即可；安装包约 100 MB。
+- 如果 Windows 提示「未知发布者」，点击「更多信息 → 仍要运行」。
+- 无法访问 GitHub 时，可发邮件索取安装包。
 
-# 开发模式（HMR 热更新）
-npm run dev
+**系统要求**：Windows 10 / 11（64 位）。
 
-# 构建生产版本
-npm run build
+## 📝 使用方法
 
-# 打包为 Windows .exe
-npm run package
-```
+1. 打开应用，从左侧「个人信息」开始，按分区填写简历。
+2. 在编辑器顶部选择模板和主题色，右侧实时预览效果。
+3. 完成后点击「导出 PDF」，选择保存位置。
+4. 中途可随时保存 JSON 存档；下次打开应用会自动恢复上次内容。
 
-> **国内网络**：Electron 二进制与 electron-builder 的打包依赖都托管在 GitHub，
-> 直连常失败。`install` 和 `package` 需要**两个不同的镜像**：
->
-> ```bash
-> # 安装依赖时
-> set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
-> npm install
->
-> # 打包时（两个都要设，electron-builder 还要下 NSIS、7zip 等）
-> set ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/
-> set ELECTRON_BUILDER_BINARIES_MIRROR=https://npmmirror.com/mirrors/electron-builder-binaries/
-> npm run package
-> ```
->
-> Git Bash / PowerShell 下用 `export` / `$env:` 代替 `set`。
-> 这些是环境变量而非写进 `.npmrc` —— 免得给非中国网络的协作者强加镜像。
+## 🔒 数据与隐私
 
-## 📦 打包产物
+- 应用完全离线，不需要登录，也不会上传简历内容。
+- 填写内容保存在本机；建议同时另存一份 JSON 文件作为备份。
+- 「简历检查」只做规则性检查与表达建议，不会编造任何经历、项目或技能。
 
-```
-dist/简历工坊 Setup <版本>.exe    NSIS 安装包（可选安装目录、中文界面）
-dist/win-unpacked/                免安装版，可直接运行其中的 exe
-```
+## 💬 帮助与反馈
 
-**安装包约 100 MB。** 体积几乎全部来自 Electron 运行时（自带 Chromium + Node），
-应用自身的代码只有约 1.7 MB（JS + CSS），压缩后占比可忽略。
-如果在意体积，只能换掉 Electron，而不是"优化代码"。
-
-> ⚠️ **`dist/` 里的安装包会过期。** `npm run package` 会先构建再打包，所以每次都取最新源码；
-> 但如果你只跑了 `npm run build`（只更新 `out/`），`dist/` 里仍是**上一次打包时的旧版本**。
-> 把安装包发给别人之前，确认一次跑的是 `npm run package`，而不是 `build`。
-
-## 🏗️ 技术栈
-
-| 类别 | 技术 |
-|------|------|
-| 桌面框架 | Electron 42 |
-| 构建工具 | electron-vite 5 + Vite 6 |
-| UI | React 19 + Tailwind CSS 4 |
-| 语言 | TypeScript |
-| 状态管理 | Zustand 5 |
-| PDF 导出 | html2pdf-browser（`html2canvas`）+ jsPDF，自行做 A4 定位与分页 |
-| 打包 | electron-builder |
-
-## 📁 项目结构
-
-```
-resume-app/
-├── electron/            # Electron 主进程 + preload
-├── resources/           # 打包图标
-├── src/
-│   ├── components/
-│   │   ├── ui/          # 原子组件（Button / Card / TextField / Icons / Toast …）
-│   │   ├── layout/      # AppBar / NavDrawer / MainLayout / StatusBar
-│   │   ├── editor/      # 编辑器面板 + 外观设置 + 7 步表单
-│   │   ├── preview/     # 预览面板 + 缩放工具栏 + 渲染容器
-│   │   └── templates/   # 3 个简历模板 + shared（排版尺度与打印色板）
-│   ├── store/           # Zustand 状态管理
-│   ├── types/           # TypeScript 类型定义
-│   ├── utils/           # 工具函数（规则引擎、A4 分页、配色、图像）
-│   └── hooks/           # 自定义 Hook
-├── docs/                # 开发文档
-└── package.json
-```
-
-> 改模板前请先读 [开发参考 · 第九节](docs/development-reference.md)：
-> 模板内颜色不能用 Tailwind 调色板类（oklch）与透明度修饰符（color-mix），
-> 否则 PDF 导出会直接失败。
-
-## 📚 文档
-
-| 文档 | 说明 |
-|------|------|
-| [开发参考](docs/development-reference.md) | 14 章完整技术文档（含 PDF 管线与颜色约束） |
-| [内测报告](docs/beta-test-report.md) | v1.2.0 内测：9 项缺陷、修复与验证证据 |
-| [Apple 对比与优化建议](docs/design-benchmark-apple.md) | 对标 macOS 系统应用的差距分析与改进路线 |
-| [错误记录](docs/errors-and-fixes.md) | 开发错误与解决方案 |
-| [更新日志](docs/CHANGELOG.md) | 版本变更 + 优化建议 |
-
-## 🧪 示例数据
-
-`samples/sample-frontend.json` 是一份完整的示例简历，用于快速查看排版效果：
-
-**打开 → 选择 `samples/sample-frontend.json`** 即可载入（该文件为虚构内容，不含任何真实个人信息）。
+- 应用内「帮助与反馈」：常见问题、更新日志、反馈入口。
+- 问题反馈：aceg5166@gmail.com
+- 项目主页：<https://github.com/frank-ace666/resume-app>
 
 ## 📄 许可证
 
