@@ -23,7 +23,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
  * 读入图片并居中裁成正方形，等比缩放后输出小尺寸 JPEG。
  *
  * 直接存原图会带来两个问题：非正方形图片在模板里会被拉变形，
- * 且 base64 会撑大 localStorage 存档。这里统一裁成正方形并压到 256px，
+ * 且 base64 会撑大加密存储文件。这里统一裁成正方形并压到 256px，
  * 避免为裁剪再引入一个第三方库。
  */
 export async function fileToSquareDataUrl(file: File): Promise<string> {

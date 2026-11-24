@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { createJSONStorage, persist } from 'zustand/middleware'
+import { secureStateStorage } from './secureStorage'
 import type {
   ResumeData,
   PersonalInfo,
@@ -198,8 +199,14 @@ export const useResumeStore = create<ResumeStore>()(
     }),
     {
       name: 'resume-craft-data',
+      // 主数据不再写 localStorage：由 secureStateStorage 走 IPC，
+      // 主进程用 safeStorage 加密后写入 userData/resume-data.enc。
+      storage: createJSONStorage(() => secureStateStorage),
+      // 异步磁盘读取完成前不要渲染编辑器，避免空数据覆盖真实存档。
+      // 由 BootGate 调用 useResumeStore.persist.rehydrate()。
+      skipHydration: true,
       partialize: (state) => ({ data: state.data, fileName: state.fileName }),
-      // localStorage 里的旧结构同样是「缺字段」来源，合并时一并补齐
+      // 旧版存档同样是「缺字段」来源，合并时一并补齐
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<ResumeStore>
         return { ...current, ...p, data: normalizeResumeData(p.data) }

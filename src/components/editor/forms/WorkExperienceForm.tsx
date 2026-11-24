@@ -39,7 +39,7 @@ export default function WorkExperienceForm() {
 
             return (
             <EntryCard key={work.id} index={i} label="工作经历" onRemove={() => remove(work.id)}>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 @min-[440px]:grid-cols-2">
                 <TextField
                   label="公司"
                   placeholder="公司名称"
@@ -94,7 +94,7 @@ export default function WorkExperienceForm() {
                   placeholder="如：北京"
                   value={work.location ?? ''}
                   onChange={(e) => update(work.id, { location: e.target.value })}
-                  className="sm:col-span-2"
+                  className="@min-[440px]:col-span-2"
                 />
               </div>
 

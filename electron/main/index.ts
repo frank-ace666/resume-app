@@ -1,6 +1,18 @@
 import { app, BrowserWindow, ipcMain, dialog, shell } from 'electron'
 import { join } from 'path'
 import { readFile, writeFile } from 'fs/promises'
+import { registerSecureStoreIpc } from './secureStore'
+
+/**
+ * 固定打包后的 userData 路径。
+ *
+ * 当前实际路径是 %APPDATA%\resume-app。显式固定它，避免未来改
+ * productName / name 后 Electron 换到新目录，让用户看起来像“数据丢了”。
+ * 必须在 requestSingleInstanceLock 之前设置，锁与数据才指向同一目录。
+ */
+if (app.isPackaged) {
+  app.setPath('userData', join(app.getPath('appData'), 'resume-app'))
+}
 
 let mainWindow: BrowserWindow | null = null
 
@@ -27,6 +39,9 @@ if (!app.requestSingleInstanceLock()) {
   })
 }
 
+// 简历数据的加密文件存储、备份、清除与恢复
+registerSecureStoreIpc()
+
 /**
  * 允许通过系统默认程序打开的外链协议白名单。
  *
@@ -50,17 +65,26 @@ function openExternalSafely(rawUrl: string): { success: boolean; error?: string 
 }
 
 function createWindow(): void {
+  // 仅用于自动化测试：不显示窗口、不占任务栏，避免在开发者桌面上弹出第二个实例。
+  // 用法：RESUME_TEST_HIDDEN=1 npx electron . --remote-debugging-port=...
+  const isTestHidden = process.env.RESUME_TEST_HIDDEN === '1'
+
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    minWidth: 1024,
+    // 分栏最小值（见 src/store/uiStore.ts）：导航 248 + 编辑区 360 + 分隔条 1 + 预览区 380 ≈ 989。
+    // 留出余量取 1100，避免窗口缩到 1024 时编辑区/预览区被压到不可用。
+    minWidth: 1100,
     minHeight: 700,
     title: '简历工坊 - Resume Craft',
+    show: !isTestHidden,
+    skipTaskbar: isTestHidden,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
       contextIsolation: true,
-      nodeIntegration: false
+      nodeIntegration: false,
+      backgroundThrottling: !isTestHidden
     }
   })
 

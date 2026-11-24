@@ -54,7 +54,7 @@
 | 构建工具 | electron-vite 5 + Vite 6 | 三进程（main/preload/renderer）统一构建 |
 | UI 框架  | React 19                 | 组件化渲染                              |
 | 类型系统 | TypeScript               | 类型安全                                |
-| 状态管理 | Zustand 5                | 轻量全局状态 + 内置 persist             |
+| 状态管理 | Zustand 5                | 轻量全局状态 + persist（安全存储适配器） |
 | 样式方案 | Tailwind CSS 4           | 原子化 CSS                              |
 | PDF 导出 | html2pdf-browser + jsPDF | 该库的 html2canvas（带中文修复）光栅化 → jsPDF 按 A4 分页 |
 
@@ -118,7 +118,10 @@ Zustand resumeStore.updateXxx()
 
 **持久化**：
 
-- Zustand persist 中间件 → localStorage（自动，防抖 2s）
+- Zustand persist → `secureStateStorage` → 主进程 `safeStorage` 加密文件
+  `userData/resume-data.enc`（约 300ms 防抖；窗口关闭时同步兜底）
+- 每次启动自动保留最近 5 份加密备份到 `userData/backups`，支持恢复最近备份
+- 旧版 localStorage 明文在首次启动时迁移并删除；`BootGate` 在异步水合完成前不渲染编辑器
 - 手动保存 → JSON 文件（通过 Electron IPC → `dialog.showSaveDialog`）
 - 手动打开 → 解析 JSON → `loadData()` 恢复
 
@@ -143,7 +146,8 @@ Header 的文件操作（新建/打开/保存）需要协调多个 store 方法�
 ```
 resume-app/
 ├── electron/                         # Electron 原生层
-│   ├── main/index.ts                 # 主进程：BrowerWindow 创建、IPC handler 注册
+│   ├── main/index.ts                 # 主进程：BrowserWindow 创建、IPC handler 注册
+│   ├── main/secureStore.ts           # safeStorage 加密文件、备份、恢复、清除
 │   └── preload/index.ts              # contextBridge 暴露安全 API 给渲染进程
 │
 ├── src/                              # React 渲染进程（前端应用）
@@ -153,10 +157,12 @@ resume-app/
 │   │
 │   ├── store/                        # Zustand 全局状态
 │   │   ├── resumeStore.ts            # 简历数据 + 增删改 + 文件操作
+│   │   ├── secureStorage.ts          # Zustand persist → IPC 加密文件（防抖/迁移/错误）
 │   │   ├── uiStore.ts                # 步骤索引、缩放、布局偏好（持久化）
 │   │   └── toastStore.ts             # 轻提示队列
 │   │
 │   ├── components/
+│   │   ├── BootGate.tsx              # 异步水合门：读取加密数据完成前不渲染 App
 │   │   ├── ui/                       # 原子组件（Material 风格，全站复用）
 │   │   │   ├── Button.tsx            # 5 种变体 + 涟漪 + loading
 │   │   │   ├── Card.tsx              # 表面容器
@@ -167,12 +173,13 @@ resume-app/
 │   │   │   └── EmptyState.tsx        # 空状态 + 主 CTA
 │   │   ├── layout/                   # 框架层：AppBar / NavDrawer / MainLayout / StatusBar
 │   │   ├── editor/                   # 编辑器：面板 + 模板选择 + 主题色 + 表单脚手架
-│   │   │   └── forms/               # 7 个步骤表单（每个独立文件）
+│   │   │   ├── forms/               # 7 个步骤表单（每个独立文件）
+│   │   │   └── help/                # 帮助/更新日志/数据与隐私（DataPrivacyView）
 │   │   ├── preview/                  # 预览器：面板 + 缩放工具栏 + 渲染容器
 │   │   └── templates/               # 7 个简历模板 + blocks.tsx / shared.tsx（共享原语、排版尺度与打印色板）
 │   │
 │   ├── hooks/                        # 自定义 Hook
-│   │   ├── useAutoSave.ts            # 自动保存逻辑（防抖 → localStorage）
+│   │   ├── useAutoSave.ts            # 状态栏保存提示（实际写入由 secureStorage 防抖）
 │   │   ├── useAccentTheme.ts         # 主题色 → 应用 --color-brand 令牌
 │   │   ├── useResizable.ts           # 编辑区/预览区拖拽分栏
 │   │   └── usePdfExport.ts           # PDF 导出逻辑（状态管理 + 回调）
@@ -187,7 +194,7 @@ resume-app/
 │   │   └── image.ts                  # 头像：读入 → 居中裁方 → 压缩
 │   │
 │   ├── App.tsx                       # 根组件：编排所有顶层逻辑
-│   ├── main.tsx                      # React 入口：挂载到 DOM
+│   ├── main.tsx                      # React 入口：BootGate + 挂载到 DOM
 │   ├── ErrorBoundary.tsx             # 错误边界：捕获渲染异常
 │   ├── index.css                     # Tailwind 入口 + 全局样式
 │   └── global.d.ts                   # window.electronAPI 类型声明

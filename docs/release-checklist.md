@@ -20,7 +20,8 @@
 - [ ] `package.json` → `version`
 - [ ] `src/data/releases.ts` → 数组头部新增对应版本条目
 - [ ] `docs/CHANGELOG.md` → 新增 `## vX.Y.Z — 标题 (日期)` 段落
-- [ ] `README.md` → 如涉及功能/下载说明，同步更新
+- [ ] `README.md` → 当前版本、安装包名、数据路径（`%APPDATA%\resume-app`）同步更新
+- [ ] `src/data/faq.ts` → 数据路径、换机/卸载说明、版本相关文案同步更新
 
 > 应用内「检查更新」读取的是
 > `https://raw.githubusercontent.com/frank-ace666/resume-app/main/package.json`。
@@ -45,8 +46,14 @@ npm run build
   - [ ] 主题色切换，界面与简历标题同时生效
   - [ ] 保存 JSON、重新打开、自动保存恢复
   - [ ] 旧存档迁移（如 `DATA_VERSION` 有变更）
+  - [ ] 旧版 localStorage 明文 → `resume-data.enc` 迁移成功，旧键被删除
+  - [ ] 加密文件不含明文姓名/电话；修改后重载能恢复
+  - [ ] 自动备份生成；「帮助与反馈 → 数据」能恢复最近备份
+  - [ ] 「清除本机数据」双重确认后主文件与备份为空
+  - [ ] 模拟损坏的 `resume-data.enc`，能显示加载错误页
   - [ ] PDF 导出：单页、多页、不同缩放级别、无空白尾页
   - [ ] 「帮助与反馈 → 更新日志 → 检查更新」可访问网络并返回正确版本
+  - [ ] 免安装版 `ResumeCraft-X.Y.Z-portable.exe` 可直接运行，与安装版共用数据目录
 
 ## 3. 打 tag 并触发 CI
 
@@ -64,13 +71,20 @@ git push origin main vX.Y.Z
 1. 校验 `tag === 'v' + package.json.version`（不一致直接失败）；
 2. `npm ci` + `npm run build`；
 3. `electron-builder --win --publish always`，把
-   `ResumeCraft-Setup-X.Y.Z.exe`（及 `latest.yml` / blockmap）上传到 **draft release**。
+   `ResumeCraft-Setup-X.Y.Z.exe`、`ResumeCraft-X.Y.Z-portable.exe`
+   （及 `latest.yml` / blockmap）上传到 **draft release**。
 
 ## 4. 验收并发布
 
+> **不要**在网页上为同一个 tag 手动新建 Release。等待 CI 生成 draft，
+> 确认 Assets 里安装版和免安装版都在，再点 Publish；否则容易出现
+> 「Release 存在但没有 exe 资产」的重复发布问题。
+
 - [ ] Actions 页面：`发布 Windows 安装包` 工作流成功
-- [ ] Releases 页面出现对应草稿，资产齐全
-- [ ] 下载草稿中的 exe，在干净环境完成安装、启动、PDF 导出
+- [ ] Releases 页面出现对应草稿，**Assets 同时包含**
+      `ResumeCraft-Setup-X.Y.Z.exe` 与 `ResumeCraft-X.Y.Z-portable.exe`
+- [ ] 下载草稿中的安装版，在干净环境完成安装、启动、PDF 导出
+- [ ] 下载草稿中的免安装版，直接运行；确认与安装版看到同一份数据
 - [ ] 点击 **Publish release**
 - [ ] 确认勾选 **Set as the latest release**
 
@@ -105,6 +119,7 @@ npx electron-builder --win --publish never
 产物：
 
 - `dist/ResumeCraft-Setup-X.Y.Z.exe` — NSIS 安装包
+- `dist/ResumeCraft-X.Y.Z-portable.exe` — 免安装单文件版
 - `dist/win-unpacked/简历工坊.exe` — 免安装版
 
 手动上传时，把 exe 作为 Release 附件上传即可；不要提交进仓库。

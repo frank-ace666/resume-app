@@ -61,6 +61,19 @@ interface UIStore {
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
+/** 编辑区宽度百分比的硬边界；拖拽实时 clamp 与持久化写入共用 */
+export const EDITOR_WIDTH_MIN = 25
+export const EDITOR_WIDTH_MAX = 75
+export const clampEditorWidthPct = (v: number) => clamp(v, EDITOR_WIDTH_MIN, EDITOR_WIDTH_MAX)
+
+/**
+ * 分栏的像素级最小宽度。
+ * 窗口最小宽度（electron/main/index.ts 的 minWidth）需要保证
+ * 导航 248 + 编辑区 360 + 分隔条 1 + 预览区 380 仍能放下。
+ */
+export const EDITOR_MIN_PX = 360
+export const PREVIEW_MIN_PX = 380
+
 export const useUIStore = create<UIStore>()(
   persist(
     (set) => ({
@@ -82,7 +95,7 @@ export const useUIStore = create<UIStore>()(
       setIsAutoSaved: (saved) => set({ isAutoSaved: saved }),
       setLastSavedAt: (time) => set({ lastSavedAt: time }),
       toggleNav: () => set((s) => ({ navCollapsed: !s.navCollapsed })),
-      setEditorWidthPct: (pct) => set({ editorWidthPct: clamp(pct, 25, 75) }),
+      setEditorWidthPct: (pct) => set({ editorWidthPct: clampEditorWidthPct(pct) }),
       toggleFocusMode: () => set((s) => ({ isFocusMode: !s.isFocusMode })),
       setFitToWidth: (fit) => set({ fitToWidth: fit }),
       setLastSeenVersion: (version) => set({ lastSeenVersion: version }),

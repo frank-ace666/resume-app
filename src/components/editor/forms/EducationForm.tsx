@@ -36,13 +36,13 @@ export default function EducationForm() {
 
             return (
             <EntryCard key={edu.id} index={i} label="教育经历" onRemove={() => remove(edu.id)}>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 @min-[440px]:grid-cols-2">
                 <TextField
                   label="学校"
                   placeholder="学校名称"
                   value={edu.school}
                   onChange={(e) => update(edu.id, { school: e.target.value })}
-                  className="sm:col-span-2"
+                  className="@min-[440px]:col-span-2"
                 />
                 <TextField
                   label="学历"

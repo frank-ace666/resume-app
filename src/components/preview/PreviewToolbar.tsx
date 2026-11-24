@@ -73,7 +73,7 @@ export default function PreviewToolbar({ onExportPDF, isExporting }: PreviewTool
         <IconFitWidth size={18} />
       </Button>
 
-      <span className="ml-2 hidden text-xs text-ink-3 lg:inline">Ctrl + 滚轮缩放</span>
+      <span className="ml-2 hidden text-xs text-ink-3 @min-[600px]:inline">Ctrl + 滚轮缩放</span>
 
       <div className="ml-auto flex items-center gap-1">
         <Button
@@ -83,7 +83,7 @@ export default function PreviewToolbar({ onExportPDF, isExporting }: PreviewTool
           onClick={toggleFocusMode}
           title={isFocusMode ? '返回编辑' : '专注预览（隐藏编辑区）'}
         >
-          <span className="hidden sm:inline">{isFocusMode ? '返回编辑' : '专注预览'}</span>
+          <span className="hidden @min-[480px]:inline">{isFocusMode ? '返回编辑' : '专注预览'}</span>
         </Button>
 
         <Button
@@ -92,8 +92,12 @@ export default function PreviewToolbar({ onExportPDF, isExporting }: PreviewTool
           loading={isExporting}
           icon={isExporting ? undefined : <IconDownload size={16} />}
           onClick={onExportPDF}
+          title="导出 PDF"
+          aria-label="导出 PDF"
         >
-          {isExporting ? '导出中…' : '导出 PDF'}
+          <span className="hidden @min-[460px]:inline">
+            {isExporting ? '导出中…' : '导出 PDF'}
+          </span>
         </Button>
       </div>
     </div>

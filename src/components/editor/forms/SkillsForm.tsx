@@ -78,7 +78,7 @@ export default function SkillsForm() {
           <div className="space-y-3">
             {skills.map((skill) => (
               <Card key={skill.id} className="anim-pop-in p-3">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
+                <div className="grid grid-cols-1 gap-3 @min-[440px]:grid-cols-2 @min-[560px]:grid-cols-[1fr_1fr_auto] @min-[560px]:items-center">
                   <TextField
                     label="技能名称"
                     placeholder="如 React"
@@ -98,7 +98,7 @@ export default function SkillsForm() {
                     size="sm"
                     title="删除技能"
                     aria-label="删除技能"
-                    className="justify-self-end hover:bg-danger-soft hover:text-danger"
+                    className="justify-self-end @min-[440px]:col-span-2 @min-[560px]:col-span-1 hover:bg-danger-soft hover:text-danger"
                     onClick={() => remove(skill.id)}
                   >
                     <IconTrash size={16} />

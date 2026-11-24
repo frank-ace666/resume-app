@@ -42,7 +42,7 @@ export default function EditorPanel() {
         </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className="@container flex-1 overflow-y-auto px-6 py-6">
         {/* 外观设置只属于简历内容步骤 */}
         {step.kind === 'content' && (
           <Card className="mb-6 space-y-4 p-4">
