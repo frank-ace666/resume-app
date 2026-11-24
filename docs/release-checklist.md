@@ -20,7 +20,8 @@
 - [ ] `package.json` → `version`
 - [ ] `src/data/releases.ts` → 数组头部新增对应版本条目
 - [ ] `docs/CHANGELOG.md` → 新增 `## vX.Y.Z — 标题 (日期)` 段落
-- [ ] `README.md` → 如涉及功能/下载说明，同步更新
+- [ ] `README.md` → 当前版本、安装包名、数据路径（`%APPDATA%\resume-app`）同步更新
+- [ ] `src/data/faq.ts` → 数据路径、换机/卸载说明、版本相关文案同步更新
 
 > 应用内「检查更新」读取的是
 > `https://raw.githubusercontent.com/frank-ace666/resume-app/main/package.json`。
