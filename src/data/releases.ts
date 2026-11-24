@@ -25,6 +25,33 @@ export const KIND_LABEL: Record<Release['highlights'][number]['kind'], string> =
 
 export const RELEASES: Release[] = [
   {
+    version: '1.3.2',
+    date: '2026-11-24',
+    headline: '分栏拖动更跟手，窄窗口不再裁掉联系方式',
+    highlights: [
+      {
+        kind: 'fix',
+        title: '分栏线不再突然跳走',
+        desc: '此前点住分隔条拖动时，编辑区会突然跳到最宽；现在分隔线会跟着鼠标走，第一次拖动也不会跳变。'
+      },
+      {
+        kind: 'improve',
+        title: '拖拽更顺滑',
+        desc: '拖动分栏时不再每帧写入本地存储，预览也不会因为延迟动画先裁掉右侧的日期和联系方式。'
+      },
+      {
+        kind: 'fix',
+        title: '窄分栏不再裁掉电话、邮箱',
+        desc: '编辑区和预览区各自保留最小宽度；表单在窄容器下自动变为单列，预览工具栏自动收起次要文字。'
+      },
+      {
+        kind: 'improve',
+        title: '窗口最小尺寸调整',
+        desc: '窗口最小宽度提高到 1100px，避免把分栏压到不可用的宽度。'
+      }
+    ]
+  },
+  {
     version: '1.3.1',
     date: '2026-10-18',
     headline: '模板增至 7 套，联系方式更贴近国内求职',

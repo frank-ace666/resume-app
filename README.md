@@ -21,7 +21,7 @@
 ## 🚀 下载与安装
 
 - 下载最新安装包：[GitHub Releases](https://github.com/frank-ace666/resume-app/releases/latest)
-- 当前版本 **v1.3.1**，安装包名 `ResumeCraft-Setup-1.3.1.exe`；版本变更见 [更新日志](docs/CHANGELOG.md)。
+- 当前版本 **v1.3.2**，安装包名 `ResumeCraft-Setup-1.3.2.exe`；版本变更见 [更新日志](docs/CHANGELOG.md)。
 - 双击安装包，按提示选择安装目录即可；安装包约 100 MB。
 - 如果 Windows 提示「未知发布者」，点击「更多信息 → 仍要运行」。
 - 无法访问 GitHub 时，可发邮件索取安装包。
