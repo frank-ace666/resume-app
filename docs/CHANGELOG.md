@@ -7,6 +7,45 @@
 
 ---
 
+## v1.3.3 — 本机数据加密、自动备份与免安装版 (2026-11-24)
+
+> 版本号：1.3.2 → 1.3.3。本版包含 v1.3.2 的分栏/布局修复。
+> 数据结构不变（`DATA_VERSION` 3），但持久化介质从 localStorage 改为加密文件。
+
+### 数据存储
+- 主数据从 `localStorage` 迁移到 `userData/resume-data.enc`，由 Electron `safeStorage`（Windows DPAPI）加密；只有当前 Windows 账号能解密。
+- 首次启动自动迁移旧版 `resume-craft-data` 明文：先写一份 `legacy-*.enc` 备份，再写加密主文件，成功后删除旧 localStorage 键。
+- 显式固定打包后的 userData 为 `%APPDATA%\resume-app`，避免未来改 `productName` / `name` 导致路径漂移。
+- 系统不支持加密时退化为 `resume-data.json` 明文，并在「数据与隐私」页显示警告；若已有加密文件则拒绝静默改写成明文。
+
+### 备份 / 恢复 / 清除
+- 每次启动第一次读取主文件时，自动复制一份加密备份到 `userData/backups`，最多保留 5 份。
+- 「帮助与反馈 → 数据」新增：打开数据文件夹、导出 JSON 备份、恢复最近备份、清除本机数据。
+- 恢复前先把当前主文件另存为 `pre-restore-*.enc`；恢复失败不会丢当前数据。
+- 清除本机数据需两次确认，删除主文件与全部备份，并清空旧 localStorage 中的简历数据；无法撤销。
+- 手动导出的 JSON 仍是明文，便于换电脑；加密文件与 Windows 账号绑定，不能直接跨账号复制。
+
+### 启动与错误处理
+- 加密文件读取是异步的，新增 `BootGate`：水合完成前不渲染编辑器，避免空状态覆盖存档。
+- 若解密失败 / 文件损坏 / 换 Windows 账号，显示错误页，提供重试、打开数据文件夹、恢复最近备份；不再静默进入空编辑器。
+- 自动保存改为约 300ms 防抖写入加密文件；窗口关闭时用同步 IPC 兜底。状态栏在输入时显示「正在保存…」，「已自动保存」仍约 2 秒后显示。
+
+### 免安装版
+- electron-builder 增加 `portable` target：`ResumeCraft-1.3.3-portable.exe`。
+- 安装版与免安装版共用 `%APPDATA%\resume-app` 数据目录；不要同时运行两份。
+
+### 安全边界（如实说明）
+- `safeStorage` / DPAPI 保护的是磁盘上的数据：其他 Windows 账号、直接拷贝文件通常无法解密；同一账号下的恶意程序仍可解密。
+- 安装包仍未做代码签名，SmartScreen 会提示「未知发布者」。
+- GitHub Release 资产页显示 SHA256，可用于校验下载文件。
+
+### 验证
+- `tsc`（web/node）、`npm run build`、`electron-builder`（NSIS + portable）通过。
+- 独立 userData 实测：旧 localStorage 迁移后加密文件不含明文姓名/电话；修改后重载仍能恢复；恢复备份回到修改前；清除后主文件与备份为空。
+- 模拟损坏的 `resume-data.enc`，BootGate 正确显示错误页。
+
+---
+
 ## v1.3.2 — 分栏交互与窄窗口布局修复 (2026-11-24)
 
 > 版本号：1.3.1 → 1.3.2。**无数据结构变更**，现有存档不受影响。

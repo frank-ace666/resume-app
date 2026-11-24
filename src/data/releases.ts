@@ -25,6 +25,38 @@ export const KIND_LABEL: Record<Release['highlights'][number]['kind'], string> =
 
 export const RELEASES: Release[] = [
   {
+    version: '1.3.3',
+    date: '2026-11-24',
+    headline: '简历数据加密保存，支持自动备份与免安装版',
+    highlights: [
+      {
+        kind: 'new',
+        title: '本机数据加密',
+        desc: '简历改用 Windows 系统加密（DPAPI）保存，只有当前 Windows 账号能解密。旧版本地数据会在首次启动时自动迁移。'
+      },
+      {
+        kind: 'new',
+        title: '自动备份与恢复',
+        desc: '每次启动自动保留最近 5 份加密备份；在「帮助与反馈 → 数据」里可以恢复最近备份。'
+      },
+      {
+        kind: 'new',
+        title: '清除本机数据',
+        desc: '双重确认后删除加密主文件、备份和布局设置，适合共享电脑或转交设备前使用。'
+      },
+      {
+        kind: 'new',
+        title: '免安装版',
+        desc: '新增单文件免安装版，不写安装记录；与安装版共用同一数据目录，删掉文件即卸载程序，数据需在应用内清除。'
+      },
+      {
+        kind: 'fix',
+        title: '包含 1.3.2 的分栏修复',
+        desc: '分栏拖动跳变、预览过渡裁切、窄窗口下电话/邮箱被挤压的问题一并修复。'
+      }
+    ]
+  },
+  {
     version: '1.3.2',
     date: '2026-11-24',
     headline: '分栏拖动更跟手，窄窗口不再裁掉联系方式',

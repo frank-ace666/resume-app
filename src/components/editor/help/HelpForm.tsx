@@ -2,9 +2,17 @@ import { useUIStore } from '@/store/uiStore'
 import { FEEDBACK_EMAIL, openExternal } from '@/utils/mailto'
 import Button from '@/components/ui/Button'
 import SegmentedControl from '@/components/ui/SegmentedControl'
-import { IconExternal, IconHelp, IconHistory, IconLightbulb, IconSend } from '@/components/ui/Icons'
+import {
+  IconExternal,
+  IconHelp,
+  IconHistory,
+  IconInfo,
+  IconLightbulb,
+  IconSend
+} from '@/components/ui/Icons'
 import FaqView from './FaqView'
 import ReleasesView from './ReleasesView'
+import DataPrivacyView from './DataPrivacyView'
 import FeedbackView from './FeedbackView'
 import ContributeView from './ContributeView'
 
@@ -17,6 +25,7 @@ import ContributeView from './ContributeView'
 const SEGMENTS = [
   { key: 'faq', label: '常见问题', icon: <IconHelp size={15} /> },
   { key: 'releases', label: '更新日志', icon: <IconHistory size={15} /> },
+  { key: 'data', label: '数据', icon: <IconInfo size={15} /> },
   { key: 'feedback', label: '建议', icon: <IconLightbulb size={15} /> },
   { key: 'contribute', label: '投稿', icon: <IconSend size={15} /> }
 ]
@@ -30,7 +39,7 @@ export default function HelpForm() {
       <div>
         <h2 className="text-base font-medium text-ink">帮助与反馈</h2>
         <p className="mt-1 text-sm leading-relaxed text-ink-2">
-          常见问题、更新日志、反馈渠道与投稿方式。找不到答案可以直接发邮件。
+          常见问题、更新日志、数据与隐私、反馈渠道与投稿方式。找不到答案可以直接发邮件。
         </p>
       </div>
 
@@ -39,6 +48,7 @@ export default function HelpForm() {
       <div key={view} className="anim-fade-slide-in">
         {view === 'faq' && <FaqView />}
         {view === 'releases' && <ReleasesView />}
+        {view === 'data' && <DataPrivacyView />}
         {view === 'feedback' && <FeedbackView />}
         {view === 'contribute' && <ContributeView />}
       </div>
