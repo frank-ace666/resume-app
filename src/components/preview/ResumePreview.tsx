@@ -56,7 +56,9 @@ export default function ResumePreview() {
     <div ref={measureRef} className="mx-auto w-full max-w-full">
       {/* 外层负责占位，尺寸随缩放变化 */}
       <div
-        className="zoom-surface relative mx-auto overflow-hidden rounded-xs bg-white"
+        className={`zoom-surface relative mx-auto overflow-hidden rounded-xs bg-white ${
+          fitToWidth ? 'zoom-surface-fit' : ''
+        }`}
         style={{
           width: `${A4_WIDTH_MM * factor}mm`,
           height: `${A4_HEIGHT_MM * factor}mm`,

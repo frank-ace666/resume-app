@@ -61,6 +61,11 @@ interface UIStore {
 
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v))
 
+/** 编辑区宽度百分比的硬边界；拖拽实时 clamp 与持久化写入共用 */
+export const EDITOR_WIDTH_MIN = 25
+export const EDITOR_WIDTH_MAX = 75
+export const clampEditorWidthPct = (v: number) => clamp(v, EDITOR_WIDTH_MIN, EDITOR_WIDTH_MAX)
+
 export const useUIStore = create<UIStore>()(
   persist(
     (set) => ({
@@ -82,7 +87,7 @@ export const useUIStore = create<UIStore>()(
       setIsAutoSaved: (saved) => set({ isAutoSaved: saved }),
       setLastSavedAt: (time) => set({ lastSavedAt: time }),
       toggleNav: () => set((s) => ({ navCollapsed: !s.navCollapsed })),
-      setEditorWidthPct: (pct) => set({ editorWidthPct: clamp(pct, 25, 75) }),
+      setEditorWidthPct: (pct) => set({ editorWidthPct: clampEditorWidthPct(pct) }),
       toggleFocusMode: () => set((s) => ({ isFocusMode: !s.isFocusMode })),
       setFitToWidth: (fit) => set({ fitToWidth: fit }),
       setLastSeenVersion: (version) => set({ lastSeenVersion: version }),

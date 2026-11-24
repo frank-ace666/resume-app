@@ -218,6 +218,14 @@
       height var(--duration-base) var(--ease-standard);
   }
 
+  /* 拖拽分栏或「适应宽度」时，预览外层不能做宽高过渡：
+     内层 transform 是即时变化的，外层慢 200ms 会先裁掉边缘的日期与联系方式。
+     离散缩放（点 +/- 按钮）仍保留上面的过渡。 */
+  .zoom-surface-fit,
+  html[data-resizing='true'] .zoom-surface {
+    transition: none;
+  }
+
   /* 折叠面板：用 grid-template-rows 0fr↔1fr 做高度动画，
      无需测量内容高度，也不会在展开时出现跳变 */
   .accordion-panel {

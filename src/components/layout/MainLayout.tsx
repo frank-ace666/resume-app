@@ -1,8 +1,13 @@
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, type CSSProperties } from 'react'
 import EditorPanel from '@/components/editor/EditorPanel'
 import PreviewPanel from '@/components/preview/PreviewPanel'
 import NavDrawer from './NavDrawer'
-import { useUIStore } from '@/store/uiStore'
+import {
+  useUIStore,
+  clampEditorWidthPct,
+  EDITOR_WIDTH_MIN,
+  EDITOR_WIDTH_MAX
+} from '@/store/uiStore'
 import { useResizable } from '@/hooks/useResizable'
 
 interface MainLayoutProps {
@@ -17,21 +22,36 @@ export default function MainLayout({ onExportPDF, isExporting }: MainLayoutProps
   const setEditorWidthPct = useUIStore((s) => s.setEditorWidthPct)
   const isFocusMode = useUIStore((s) => s.isFocusMode)
 
-  const getContainerWidth = useCallback(() => splitRef.current?.clientWidth ?? 0, [])
+  const getContainerRect = useCallback(
+    () => splitRef.current?.getBoundingClientRect() ?? null,
+    []
+  )
+
+  // 拖拽中只改 CSS 变量（不触发 React 重渲染、不写 localStorage），
+  // 松手时才通过 onResizeEnd 写入持久化 store。
+  const handleLiveResize = useCallback((pct: number) => {
+    splitRef.current?.style.setProperty('--editor-width', `${clampEditorWidthPct(pct)}%`)
+  }, [])
+
   const { isDragging, handlePointerDown } = useResizable({
-    getContainerWidth,
-    onResize: setEditorWidthPct
+    getContainerRect,
+    onResize: handleLiveResize,
+    onResizeEnd: setEditorWidthPct
   })
 
   return (
     <main className="flex flex-1 overflow-hidden">
       <NavDrawer />
 
-      <div ref={splitRef} className="relative flex flex-1 overflow-hidden">
+      <div
+        ref={splitRef}
+        className="relative flex flex-1 overflow-hidden"
+        style={{ '--editor-width': `${editorWidthPct}%` } as CSSProperties}
+      >
         {!isFocusMode && (
           <>
             <div
-              style={{ width: `${editorWidthPct}%` }}
+              style={{ width: 'var(--editor-width)' }}
               className="min-w-0 shrink-0 overflow-hidden bg-surface"
             >
               <EditorPanel />
@@ -43,7 +63,10 @@ export default function MainLayout({ onExportPDF, isExporting }: MainLayoutProps
               role="separator"
               aria-orientation="vertical"
               aria-label="拖动调整编辑区宽度"
-              className={`group relative z-10 w-px shrink-0 cursor-col-resize bg-outline transition-colors duration-[var(--duration-fast)] ${
+              aria-valuenow={Math.round(editorWidthPct)}
+              aria-valuemin={EDITOR_WIDTH_MIN}
+              aria-valuemax={EDITOR_WIDTH_MAX}
+              className={`group relative z-10 w-px shrink-0 cursor-col-resize touch-none bg-outline transition-colors duration-[var(--duration-fast)] ${
                 isDragging ? 'bg-brand' : 'hover:bg-brand'
               }`}
             >
