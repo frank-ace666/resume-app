@@ -53,7 +53,9 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    minWidth: 1024,
+    // 分栏最小值（见 src/store/uiStore.ts）：导航 248 + 编辑区 360 + 分隔条 1 + 预览区 380 ≈ 989。
+    // 留出余量取 1100，避免窗口缩到 1024 时编辑区/预览区被压到不可用。
+    minWidth: 1100,
     minHeight: 700,
     title: '简历工坊 - Resume Craft',
     webPreferences: {

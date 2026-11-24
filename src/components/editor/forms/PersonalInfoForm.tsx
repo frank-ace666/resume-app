@@ -205,7 +205,7 @@ export default function PersonalInfoForm() {
 
       <AvatarUploader />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 @min-[440px]:grid-cols-2">
         {FIELDS.map((f) => {
           const value = String(info[f.key] ?? '')
           const shared = {
@@ -215,7 +215,7 @@ export default function PersonalInfoForm() {
             onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
               update({ [f.key]: e.target.value }),
             addon: f.icon,
-            className: f.key === 'fullName' || f.key === 'title' ? 'sm:col-span-2' : ''
+            className: f.key === 'fullName' || f.key === 'title' ? '@min-[440px]:col-span-2' : ''
           }
 
           return f.validate ? (

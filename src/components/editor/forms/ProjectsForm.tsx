@@ -71,7 +71,7 @@ export default function ProjectsForm() {
 
             return (
             <EntryCard key={proj.id} index={i} label="项目经历" onRemove={() => remove(proj.id)}>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 @min-[440px]:grid-cols-2">
                 <TextField
                   label="项目名称"
                   placeholder="如：电商小程序重构"
@@ -104,7 +104,7 @@ export default function ProjectsForm() {
                   value={proj.link ?? ''}
                   onChange={(e) => update(proj.id, { link: e.target.value })}
                   validate={(v) => checkLink(v, '项目链接')}
-                  className="sm:col-span-2"
+                  className="@min-[440px]:col-span-2"
                 />
               </div>
 

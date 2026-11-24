@@ -32,7 +32,7 @@ export default function PreviewPanel({ onExportPDF, isExporting }: PreviewPanelP
   }, [previewScale, setScale, setFitToWidth])
 
   return (
-    <section className="flex h-full flex-col bg-canvas">
+    <section className="@container flex h-full flex-col bg-canvas">
       <PreviewToolbar onExportPDF={onExportPDF} isExporting={isExporting} />
 
       <div

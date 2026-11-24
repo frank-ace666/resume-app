@@ -16,7 +16,7 @@ export function FormHeader({
   onAction?: () => void
 }) {
   return (
-    <div className="mb-5 flex items-start justify-between gap-4">
+    <div className="mb-5 flex flex-wrap items-start justify-between gap-4">
       <div className="min-w-0">
         <h2 className="text-base font-medium text-ink">{title}</h2>
         <p className="mt-1 text-sm leading-relaxed text-ink-2">{description}</p>

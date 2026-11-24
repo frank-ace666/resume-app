@@ -66,6 +66,14 @@ export const EDITOR_WIDTH_MIN = 25
 export const EDITOR_WIDTH_MAX = 75
 export const clampEditorWidthPct = (v: number) => clamp(v, EDITOR_WIDTH_MIN, EDITOR_WIDTH_MAX)
 
+/**
+ * 分栏的像素级最小宽度。
+ * 窗口最小宽度（electron/main/index.ts 的 minWidth）需要保证
+ * 导航 248 + 编辑区 360 + 分隔条 1 + 预览区 380 仍能放下。
+ */
+export const EDITOR_MIN_PX = 360
+export const PREVIEW_MIN_PX = 380
+
 export const useUIStore = create<UIStore>()(
   persist(
     (set) => ({
