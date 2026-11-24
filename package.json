@@ -38,9 +38,16 @@
       "out/**/*",
       "!node_modules/**/*"
     ],
+    "publish": {
+      "provider": "github",
+      "owner": "frank-ace666",
+      "repo": "resume-app",
+      "releaseType": "draft"
+    },
     "win": {
       "target": "nsis",
-      "icon": "resources/icon.ico"
+      "icon": "resources/icon.ico",
+      "artifactName": "ResumeCraft-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,

@@ -1,0 +1,54 @@
+name: 发布 Windows 安装包
+
+# 只有推送 v* tag 时才触发，避免日常 push 消耗 runner。
+# 产物先进入 draft release，人工验收后再点 Publish。
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: 校验 tag 与 package.json 版本一致
+        shell: bash
+        run: |
+          node -e "
+            const version = require('./package.json').version;
+            const tag = process.env.GITHUB_REF_NAME;
+            if (tag !== 'v' + version) {
+              console.error('版本不一致：tag=' + tag + '，package.json=' + version);
+              process.exit(1);
+            }
+            console.log('版本一致：' + tag);
+          "
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 构建应用
+        run: npm run build
+
+      - name: 打包并上传到 GitHub Release（草稿）
+        run: npx electron-builder --win --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
